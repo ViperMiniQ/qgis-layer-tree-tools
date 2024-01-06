@@ -468,47 +468,6 @@ Options:
   
 </pre>
 
-## SNAPSHOT
-
-Snapshot is a simple copy of the current layer tree.  
-Raster layers are copied by reference (absolute filepath), while for vector layers there is an option to either save by reference or by full copy of the layer attributes.  
-Full vector layer copy includes layer attributes, features (feature attributes and geometry) and crs.  
-Memory layers are regardless of the option for standard vector layers fully copied and saved to file.  
-
-.snp (snapshot) file is saved in the plugin directory in /Snapshots/.
-
-.snp files can be shared among other instances of QGIS or other PCs (supported from QGIS 3.0 version). 
-As the snapshot stores an absolute path, there is no option to 'search for' or 'recover' the new filepath. 
-If a load fails on some of the layers, a window containing name, type and datasource will display information of the layers that have failed to load.
-
-Snapshot does not contain other QGIS layer properties, such as symbology and visibility.
-
-### CREATING SNAPSHOT
-
-* Include rasters
-
-   If the option is ticked, raster absolute filepaths will be saved to a snapshot file.
-  
-* Include vector layers
-
-  If the option is ticked, vector layers absolute filepaths will be saved to a snapshot file.
-  Memory layers are fully copied and saved.
-
-* Copy all vector layers to memory
-
-  If the option is ticked, instead of saving the absolute filepath, layer properties and features are to a file.
-  Saved properties are: layer crs, layer geometry type, layer name, layer attributes, layer features (feature attributes and feature geometry)
-
-### LOADING SNAPSHOT
-
-* Replace entire tree with the snapshot
-
-   Clears entire layer tree and loads the snapshot
-
-* Load snapshot into a separate group in root
-
-   Loads the snapshot in newly created 'snapshot _snapshot name_' group
-
 ## GROUPING
 
 Creates groups with the layers sharing the same selected attribute(s).  
@@ -589,3 +548,45 @@ All ESRI Shapefile extensions are taken into account when getting size on disk o
 ### FILETYPE
 
 Groups layers of the same filetype.
+
+
+## SNAPSHOT
+
+Snapshot is a simple copy of the current layer tree.  
+Raster layers are copied by reference (absolute filepath), while for vector layers there is an option to either save by reference or by full copy of the layer attributes.  
+Full vector layer copy includes layer attributes, features (feature attributes and geometry) and crs.  
+Memory layers are regardless of the option for standard vector layers fully copied and saved to file.  
+
+.snp (snapshot) file is saved in the plugin directory in /Snapshots/.
+
+.snp files can be shared among other instances of QGIS or other PCs (supported from QGIS 3.0 version). 
+As the snapshot stores an absolute path, there is no option to 'search for' or 'recover' the new filepath. 
+If a load fails on some of the layers, a window containing name, type and datasource will display information of the layers that have failed to load.
+
+Snapshot does not contain other QGIS layer properties, such as symbology and visibility.
+
+### CREATING SNAPSHOT
+
+* Include rasters
+
+   If the option is ticked, raster absolute filepaths will be saved to a snapshot file.
+  
+* Include vector layers
+
+  If the option is ticked, vector layers absolute filepaths will be saved to a snapshot file.
+  Memory layers are fully copied and saved.
+
+* Copy all vector layers to memory
+
+  If the option is ticked, instead of saving the absolute filepath, layer properties and features are to a file.
+  Saved properties are: layer crs, layer geometry type, layer name, layer attributes, layer features (feature attributes and feature geometry)
+
+### LOADING SNAPSHOT
+
+* Replace entire tree with the snapshot
+
+   Clears entire layer tree and loads the snapshot
+
+* Load snapshot into a separate group in root
+
+   Loads the snapshot in newly created 'snapshot _snapshot name_' group
