@@ -9,7 +9,7 @@
         begin                : 2023-10-10
         git sha              : $Format:%H$
         copyright            : (C) 2023 by Viper MiniQ
-        email                : dodocindro@gmail.com
+        email                : viperminiq@gmail.com
  ***************************************************************************/
 
 /***************************************************************************
