@@ -1,0 +1,48 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.
+# Mandatory items:
+
+[general]
+name=Layer Tree Tools
+qgisMinimumVersion=3.0
+description=Sorts and groups nodes in layer tree, takes layer tree snapshots
+version=1.0
+author=Viper MiniQ
+email=viperminiq@gmail.com
+
+about=Adds the ability to sort layer tree nodes by one of their attributes (name, geometry, position etc.) as well as grouping nodes that share the same attribute. Snapshoting is the ability to save current tree format and reload tree nodes in order in which they were (memory layers can also be stored and reloaded as memory layers).
+
+tracker=https://github.com/ViperMiniQ/qgis-layer-tree-tools/issues
+repository=https://github.com/ViperMiniQ/qgis-layer-tree-tools
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=python
+
+homepage=https://github.com/ViperMiniQ/qgis-layer-tree-tools
+category=Plugins
+icon=sort_icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/layer_tree_tools" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
