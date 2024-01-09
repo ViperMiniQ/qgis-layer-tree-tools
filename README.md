@@ -48,15 +48,15 @@ Options:
 <pre>
   
           root only           .  order within all groups (root included)  .      selected group(s) only    .  extract all and sort in root
-                              .                                           .
-├── CROATIA                   .  ├── CROATIA                              .  ├── SERBIA                    .    ├── Belgrade
-│   ├── Zagreb                .  │   ├── Osijek                           .  │   ├── Belgrade              .    ├── Kragujevac
-│   ├── Osijek                .  │   ├── Rijeka                           .  │   ├── Novi Sad              .    ├── Niš
-│   ├── Rijeka                .  │   ├── Split                            .  │   ├── Niš                   .    ├── Novi Sad
-│   └── Split                 .  │   └── Zagreb                           .  │   └── Kragujevac            .    ├── Osijek
-└── SERBIA                    .  └── SERBIA                               .  └── CROATIA (selected group)  .    ├── Rijeka
-    ├── Belgrade              .      ├── Belgrade                         .      ├── Osijek                .    ├── Split
-    ├── Novi Sad              .      ├── Kragujevac                       .      ├── Rijeka                .    └── Zagreb
+                              .                                           .                                .
+├── CROATIA                   .  ├── CROATIA                              .  ├── SERBIA                    .  ├── Belgrade
+│   ├── Zagreb                .  │   ├── Osijek                           .  │   ├── Belgrade              .  ├── Kragujevac
+│   ├── Osijek                .  │   ├── Rijeka                           .  │   ├── Novi Sad              .  ├── Niš
+│   ├── Rijeka                .  │   ├── Split                            .  │   ├── Niš                   .  ├── Novi Sad
+│   └── Split                 .  │   └── Zagreb                           .  │   └── Kragujevac            .  ├── Osijek
+└── SERBIA                    .  └── SERBIA                               .  └── CROATIA (selected group)  .  ├── Rijeka
+    ├── Belgrade              .      ├── Belgrade                         .      ├── Osijek                .  ├── Split
+    ├── Novi Sad              .      ├── Kragujevac                       .      ├── Rijeka                .  └── Zagreb
     ├── Niš                   .      ├── Niš                              .      ├── Split                 .
     └── Kragujevac            .      └── Novi Sad                         .      └── Zagreb                .
 
