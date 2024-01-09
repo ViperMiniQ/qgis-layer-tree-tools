@@ -49,7 +49,7 @@ Options:
   
           root only           .  order within all groups (root included)  .      selected group(s) only    .  extract all and sort in root
                               .                                           .                                .
-├── CROATIA                   .  ├── CROATIA                              .  ├── SERBIA                    .  ├── Belgrade
+├── CROATIA                   .  ├── CROATIA                              .  ├── SERBIA                    .  ├── Belgrade 
 │   ├── Zagreb                .  │   ├── Osijek                           .  │   ├── Belgrade              .  ├── Kragujevac
 │   ├── Osijek                .  │   ├── Rijeka                           .  │   ├── Novi Sad              .  ├── Niš
 │   ├── Rijeka                .  │   ├── Split                            .  │   ├── Niš                   .  ├── Novi Sad
