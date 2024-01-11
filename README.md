@@ -5,16 +5,16 @@
 Options:
   * root only
     
-    Sorts layers and groups in root only.
+    Sorts nodes in root only.
     
   * order within all groups (root included)
 
-    Sorts layers and groups in all groups, including root.
+    Sorts nodes in all groups, including root.
 
   * within selected group(s)
 
-    Sorts layers and groups only in selected group(s).  
-    Does not sort sub-groups in groups.
+    Sorts nodes only in selected group(s).  
+    Does not sort nodes in sub-groups.
 
   * extract and sort all in root
 
