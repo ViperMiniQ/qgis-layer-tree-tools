@@ -66,6 +66,7 @@ class LayerTreeTools:
 
         # Declare instance attributes
         self.actions = []
+        self.layers_panel_actions = []
         self.menu = self.tr(u'&layer_tree_tools')
 
         self.toolbutton = QToolButton()
@@ -173,6 +174,33 @@ class LayerTreeTools:
         sort_icon_path = self.plugin_dir + '/sort_icon.png'
         snapshot_icon_path = self.plugin_dir + '/snapshot_icon.png'
 
+        # layers panel
+
+        self.action_sorter_layers_panel = QAction(
+            QIcon(sort_icon_path),
+            self.tr("Sort and group"),
+            parent=self.iface.mainWindow(),
+        )
+        self.action_sorter_layers_panel.triggered.connect(self.run)
+        self.layers_panel_actions.append(self.action_sorter_layers_panel)
+
+        self.action_snapshots_layers_panel = QAction(
+            QIcon(snapshot_icon_path),
+            self.tr("Snapshots"),
+            parent=self.iface.mainWindow(),
+        )
+        self.action_snapshots_layers_panel.triggered.connect(self.run_snapshooter)
+        self.layers_panel_actions.append(self.action_snapshots_layers_panel)
+
+        layers_panel_toolbar = self._get_layers_panel_toolbar()
+
+        if layers_panel_toolbar:
+            for action in self.layers_panel_actions:
+                layers_panel_toolbar.addAction(action)
+
+        # /layers panel
+
+        # plugins toolbar
         self.action_sorter = QAction(
             QIcon(sort_icon_path),
             self.tr('Sort and group layer tree'),
@@ -197,15 +225,27 @@ class LayerTreeTools:
         self.actions.append(self.action_sorter)
         self.actions.append(self.action_snapshooter)
 
+        # /plugins toolbar
+
         self.first_start = True
 
+    def _get_layers_panel_toolbar(self):
+        return self.iface.mainWindow().findChild(QDockWidget, "Layers").findChild(QToolBar)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.tr(u'&layer_tree_tools'),
-                action)
+                action
+            )
+        self.iface.removeToolBarIcon(self.toolbutton_action)
+
+        layers_panel_toolbar = self._get_layers_panel_toolbar()
+        if layers_panel_toolbar:
+            for action in self.layers_panel_actions:
+                layers_panel_toolbar.removeAction(action)
+
         self.iface.removeToolBarIcon(self.toolbutton_action)
 
 

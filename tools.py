@@ -52,6 +52,24 @@ def get_project_storage_types() -> List[str]:
     return storage_types
 
 
+def get_node_level(node: QgsLayerTreeNode):
+    level = -1
+
+    if not is_node_a_group(node):
+        return level
+
+    level += 1
+
+    try:
+        while node.parent() is not None:
+            level += 1
+            node = node.parent()
+    except Exception:
+        pass
+    finally:
+        return level
+
+
 def delete_node(node: QgsLayerTreeNode):
     parent = node.parent()
     parent.removeChildNode(node)
@@ -202,7 +220,7 @@ def get_selected_groups() -> List[QgsLayerTreeGroup]:
         if is_node_a_group(node):
             groups.append(node)
 
-    return groups
+    return sorted(groups, key=lambda group: get_node_level(group))
 
 
 def is_layer_a_vector_layer(layer: QgsLayerTreeLayer) -> bool:
@@ -300,7 +318,7 @@ def translate_byte_size_to_megabyte_size(byte_size: float, decimals: int = 2) ->
 
 def get_layer_features(layer: QgsVectorLayer) -> List[Dict]:
     if not isinstance(layer, QgsVectorLayer):
-        return None
+        return []
 
     data = []
     for feature in layer.getFeatures():
