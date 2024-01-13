@@ -66,8 +66,7 @@ class Snapshooter(QgsTask):
                 self.snapshot_layer_symbology
             )
             return True
-        except Exception as e:
-            print(e)
+        except Exception:
             return False
 
     def _generate_snapshot_id(self, time: datetime.datetime) -> str:

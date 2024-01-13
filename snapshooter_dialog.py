@@ -217,14 +217,13 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                         continue
 
                 map_layer = QgsProject.instance().addMapLayer(layer, False)
-                print(type(map_layer))
                 group.addLayer(map_layer)
 
                 if symbology is not None:
                     if key in symbology.keys():
                         result, qdom = tools.string_to_qdom(str(symbology[key]))
-                        print(result, qdom)
-                        print(tools.set_layer_named_style_from_qdom(map_layer, qdom))
+
+                        tools.set_layer_named_style_from_qdom(map_layer, qdom)
 
             except Exception:
                 report.append({'Name': value['name'], 'Provider': value['provider'], 'Datasource': value['filepath']})

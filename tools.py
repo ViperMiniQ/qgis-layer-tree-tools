@@ -420,7 +420,6 @@ def show_yes_no_message(text: str) -> bool:
 
 
 def get_named_style_as_qdom(layer: QgsMapLayer) -> QDomDocument:
-
     doc = QDomDocument()
     try:
         layer.exportNamedStyle(doc)
@@ -452,7 +451,6 @@ def set_layer_named_style_from_qdom(layer: QgsMapLayer, document: QDomDocument):
     try:
         layer.importNamedStyle(document)
     except Exception as e:
-        print(e)
         check = False
     finally:
         return check
