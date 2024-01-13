@@ -187,7 +187,10 @@ class Snapshooter(QgsTask):
             if self.isCanceled():
                 raise RuntimeError
 
-            key = f"({node.name()}){id(node)}"
+            # integer(0, 1) - is layer visibility toggled on or off
+            # group/layer name within parenthesis
+            # id to keep unique values in dictionary keys
+            key = f"{int(tools.is_node_visible(node))}({node.name()}){id(node)}"
 
             if tools.is_node_a_group(node):
                 if key not in current.keys():

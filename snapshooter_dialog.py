@@ -184,11 +184,21 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
             if not isinstance(value, dict):
                 continue
 
+            state = key[0]
+            if not state.isnumeric():
+                state = True
+            else:
+                state = bool(int(state))
+
             if not (set(snapshooter.Snapshooter.LAYER_DETAILS_KEYS) == set(list(value.keys()))):
                 if '(' not in key or ')' not in key:
                     continue
                 group_name = key[key.find("(") + 1:key.find(")")]
-                self._load_snapshot_layers(tools.create_group(group, group_name), value, report, symbology)
+
+                new_group = tools.create_group(group, group_name)
+                tools.set_node_visibility(new_group, state)
+
+                self._load_snapshot_layers(new_group, value, report, symbology)
                 continue
 
             try:
@@ -217,6 +227,7 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                         continue
 
                 map_layer = QgsProject.instance().addMapLayer(layer, False)
+
                 group.addLayer(map_layer)
 
                 if symbology is not None:
@@ -224,6 +235,8 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                         result, qdom = tools.string_to_qdom(str(symbology[key]))
 
                         tools.set_layer_named_style_from_qdom(map_layer, qdom)
+
+                tools.set_node_visibility(map_layer, state)
 
             except Exception:
                 report.append({'Name': value['name'], 'Provider': value['provider'], 'Datasource': value['filepath']})

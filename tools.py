@@ -454,3 +454,17 @@ def set_layer_named_style_from_qdom(layer: QgsMapLayer, document: QDomDocument):
         check = False
     finally:
         return check
+
+
+def is_node_visible(node: QgsLayerTreeNode):
+    return node.isVisible()
+
+
+def set_node_visibility(node: QgsLayerTreeNode, state: bool = True):
+    try:
+        if is_node_a_group(node):
+            node.setItemVisibilityChecked(bool(state))
+            return
+        QgsProject.instance().layerTreeRoot().findLayer(node.id()).setItemVisibilityChecked(bool(state))
+    except Exception as e:
+        pass
