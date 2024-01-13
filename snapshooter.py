@@ -46,6 +46,7 @@ class Snapshooter(QgsTask):
         Vector layers in memory: {str(vector_layers_in_memory)}')
 
         self.new_snapshot = {}
+        self.snapshot_layer_symbology = {}
         self.starting_point = starting_point
         self.name = name
         self.include_rasters = include_rasters
@@ -61,10 +62,12 @@ class Snapshooter(QgsTask):
                 tools.get_layer_tree() if self.starting_point is None else self.starting_point,
                 self.include_rasters,
                 self.include_vector_layers,
-                self.vector_layers_in_memory
+                self.vector_layers_in_memory,
+                self.snapshot_layer_symbology
             )
             return True
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
     def _generate_snapshot_id(self, time: datetime.datetime) -> str:
@@ -84,6 +87,7 @@ class Snapshooter(QgsTask):
         current_time = datetime.datetime.now()
 
         snapshot_id = self._generate_snapshot_id(current_time)
+
         snapshot_details = {
             'at_time': current_time,
             'name': self.name,
@@ -92,12 +96,12 @@ class Snapshooter(QgsTask):
             'vector_layers_in_memory': self.vector_layers_in_memory,
             'id': snapshot_id
         }
-
         filepath = SNAPSHOT_DIR + re.sub('[^a-zA-Z0-9]+', '', snapshot_id) + '.snp'
 
         with open(filepath, 'wb') as file:
             pickle.dump(snapshot_details, file, protocol=4)
             pickle.dump(self.new_snapshot, file, protocol=4)
+            pickle.dump(self.snapshot_layer_symbology, file, protocol=4)
 
         if self.callback_func is not None:
             self.callback_func(snapshot_details)
@@ -145,6 +149,7 @@ class Snapshooter(QgsTask):
         """-> Tuple[Dict, Snapshot]"""
         snap = None
         details = None
+        symbology = None
 
         for file in os.listdir(SNAPSHOT_DIR):
             if file.endswith('.snp'):
@@ -154,6 +159,10 @@ class Snapshooter(QgsTask):
                         details = pickle.load(f)
                         if details['id'] == id_:
                             snap = pickle.load(f)
+                            try:
+                                symbology = pickle.load(f)
+                            except EOFError:
+                                symbology = None
                             break
                 except Exception:
                     continue
@@ -161,7 +170,7 @@ class Snapshooter(QgsTask):
         if snap is None:
             details = None
 
-        return details, snap
+        return details, snap, symbology
 
     def _build_dictionary(
             self,
@@ -169,7 +178,8 @@ class Snapshooter(QgsTask):
             root=None,
             include_rasters: bool = True,
             include_vector_layers: bool = True,
-            vector_layers_in_memory: bool = False
+            vector_layers_in_memory: bool = False,
+            symbology=None
     ):
         if root is None:
             return
@@ -183,13 +193,15 @@ class Snapshooter(QgsTask):
             if tools.is_node_a_group(node):
                 if key not in current.keys():
                     current[key] = {}
-                self._build_dictionary(current[key], node, include_rasters, include_vector_layers, vector_layers_in_memory)
+                self._build_dictionary(current[key], node, include_rasters, include_vector_layers, vector_layers_in_memory, symbology)
                 continue
 
             if tools.is_node_a_layer(node):
                 layer = node.layer()
                 if not layer.isValid():
                     continue
+
+                symbology[key] = tools.stringify_qdom(tools.get_named_style_as_qdom(layer))
 
                 if include_rasters and tools.is_layer_a_raster(layer):
                     current[key] = self.get_layer_details(layer)
@@ -221,5 +233,5 @@ class Snapshooter(QgsTask):
             "provider": tools.get_layer_provider(layer),
             "type": tools.get_layer_type(layer),
             "features": tools.get_layer_features(layer) if copy_features else [],
-            "attributes": convert_attributes_to_dict_list(tools.get_layer_attributes(layer)) if copy_attributes else []
+            "attributes": convert_attributes_to_dict_list(tools.get_layer_attributes(layer)) if copy_attributes else [],
         }

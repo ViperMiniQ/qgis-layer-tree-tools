@@ -179,7 +179,7 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
             id_=snapshot['id']
         )
 
-    def _load_snapshot_layers(self, group: QgsLayerTreeGroup, current, report):
+    def _load_snapshot_layers(self, group: QgsLayerTreeGroup, current, report, symbology=None):
         for key, value in current.items():  # in reverse order? should be OK
             if not isinstance(value, dict):
                 continue
@@ -188,7 +188,7 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                 if '(' not in key or ')' not in key:
                     continue
                 group_name = key[key.find("(") + 1:key.find(")")]
-                self._load_snapshot_layers(tools.create_group(group, group_name), value, report)
+                self._load_snapshot_layers(tools.create_group(group, group_name), value, report, symbology)
                 continue
 
             try:
@@ -215,8 +215,17 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                     if not tools.load_features_to_layer(layer, value['features']):
                         report.append({'Name': value['name'], 'Provider': value['provider'], 'Datasource': value['filepath']})
                         continue
-                QgsProject.instance().addMapLayer(layer, False)
-                group.addLayer(layer)
+
+                map_layer = QgsProject.instance().addMapLayer(layer, False)
+                print(type(map_layer))
+                group.addLayer(map_layer)
+
+                if symbology is not None:
+                    if key in symbology.keys():
+                        result, qdom = tools.string_to_qdom(str(symbology[key]))
+                        print(result, qdom)
+                        print(tools.set_layer_named_style_from_qdom(map_layer, qdom))
+
             except Exception:
                 report.append({'Name': value['name'], 'Provider': value['provider'], 'Datasource': value['filepath']})
 
@@ -226,7 +235,7 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
         if not selected_row_data:
             return
 
-        details, snapshot = snapshooter.Snapshooter.get_snapshot(selected_row_data['ID'])
+        details, snapshot, symbology = snapshooter.Snapshooter.get_snapshot(selected_row_data['ID'])
 
         if snapshot is None:
             return  # TODO: throw error
@@ -238,7 +247,7 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
 
         report = []
 
-        self._load_snapshot_layers(starting_group, snapshot, report)
+        self._load_snapshot_layers(starting_group, snapshot, report, symbology)
 
         if report:
             dlg_report = SnapshotReporter(report)
