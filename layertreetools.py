@@ -21,12 +21,14 @@
  *                                                                         *
  ***************************************************************************/
 """
+from PyQt5.QtWidgets import QMenu, QAction
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('127.0.0.1', port=53100, stdoutToServer=True, stderrToServer=True)
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import *
+
 # from qgis.PyQt.QtWidgets import QAction
 
 # Initialize Qt resources from file resources.py
@@ -35,6 +37,9 @@ from .resources import *
 from .layer_tree_tools_dialog import SortAndGroupDialog
 from .snapshooter_dialog import snapshooterDialog
 import os.path
+
+from . import additional_actions
+from . import tools
 
 
 class LayerTreeTools:
@@ -168,11 +173,118 @@ class LayerTreeTools:
 
         return action
 
+    def _create_feature_count_action(self, parent):
+        toggle_feature_count_menu = QMenu()
+
+        toggle_feature_count_all_layers_on = QAction(
+            self.tr("Toggle feature count ON (all layers)"),
+            parent=toggle_feature_count_menu
+        )
+        toggle_feature_count_all_layers_on.triggered.connect(lambda: self.toggle_all_nodes_feature_count(True))
+        toggle_feature_count_menu.addAction(toggle_feature_count_all_layers_on)
+
+        toggle_feature_count_all_layers_off = QAction(
+            self.tr("Toggle feature count OFF (all layers)"),
+            parent=toggle_feature_count_menu
+        )
+        toggle_feature_count_all_layers_off.triggered.connect(lambda: self.toggle_all_nodes_feature_count(False))
+        toggle_feature_count_menu.addAction(toggle_feature_count_all_layers_off)
+        toggle_feature_count_menu.addSeparator()
+
+        toggle_feature_count_selected_groups_on = QAction(
+            self.tr("Toggle feature count ON (in selected group(s))"),
+            parent=toggle_feature_count_menu
+        )
+        toggle_feature_count_selected_groups_on.triggered.connect(
+            lambda: self.toggle_nodes_feature_count_in_selected_groups(True)
+        )
+        toggle_feature_count_menu.addAction(toggle_feature_count_selected_groups_on)
+
+        toggle_feature_count_selected_groups_off = QAction(
+            self.tr("Toggle feature count OFF (in selected group(s))"),
+            parent=toggle_feature_count_menu
+        )
+        toggle_feature_count_selected_groups_off.triggered.connect(
+            lambda: self.toggle_nodes_feature_count_in_selected_groups(False)
+        )
+        toggle_feature_count_menu.addAction(toggle_feature_count_selected_groups_off)
+        toggle_feature_count_menu.addSeparator()
+
+        toggle_feature_count_selected_nodes_on = QAction(
+            self.tr("Toggle feature count ON (selected layers)"),
+            parent=toggle_feature_count_menu
+        )
+        toggle_feature_count_selected_nodes_on.triggered.connect(
+            lambda: self.toggle_nodes_feature_count_on_selected_nodes(True)
+        )
+        toggle_feature_count_menu.addAction(toggle_feature_count_selected_nodes_on)
+
+        toggle_feature_count_selected_nodes_off = QAction(
+            self.tr("Toggle feature count OFF (selected layers)"),
+            parent=toggle_feature_count_menu
+        )
+        toggle_feature_count_selected_nodes_off.triggered.connect(
+            lambda: self.toggle_nodes_feature_count_on_selected_nodes(False)
+        )
+        toggle_feature_count_menu.addAction(toggle_feature_count_selected_nodes_off)
+
+        toggle_feature_count_action = QAction(
+            self.tr("Toggle feature count"),
+            parent=parent
+        )
+        toggle_feature_count_action.setMenu(toggle_feature_count_menu)
+
+        return toggle_feature_count_action
+
+    def _create_reload_action(self, parent):
+        reload_layers_menu = QMenu()
+
+        reload_selected_layers = QAction(
+            self.tr("Reload selected layers"),
+            parent=reload_layers_menu
+        )
+        reload_selected_layers.triggered.connect(self.reload_selected_layers)
+        reload_layers_menu.addAction(reload_selected_layers)
+        reload_layers_menu.addSeparator()
+
+        reload_layers_in_selected_groups = QAction(
+            self.tr("Reload layers in selected group(s)"),
+            parent=reload_layers_menu
+        )
+        reload_layers_in_selected_groups.triggered.connect(self.reload_layers_in_selected_groups)
+        reload_layers_menu.addAction(reload_layers_in_selected_groups)
+        reload_layers_menu.addSeparator()
+
+        reload_all_layers = QAction(
+            self.tr("Reload all layers"),
+            parent=reload_layers_menu
+        )
+        reload_all_layers.triggered.connect(self.reload_all_layers)
+        reload_layers_menu.addAction(reload_all_layers)
+
+        reload_layers = QAction(
+            self.tr("Reload layers"),
+            parent=parent
+        )
+        reload_layers.setMenu(reload_layers_menu)
+
+        return reload_layers
+
+    def _get_additional_actions_menu(self):
+        additional_actions_menu = QMenu()
+
+        additional_actions_menu.addAction(self._create_feature_count_action(additional_actions_menu))
+
+        additional_actions_menu.addAction(self._create_reload_action(additional_actions_menu))
+
+        return additional_actions_menu
+
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         sort_icon_path = self.plugin_dir + '/sort_icon.png'
         snapshot_icon_path = self.plugin_dir + '/snapshot_icon.png'
+        additional_actions_icon_path = self.plugin_dir + '/additional_actions_icon.png'
 
         # layers panel
 
@@ -191,6 +303,15 @@ class LayerTreeTools:
         )
         self.action_snapshots_layers_panel.triggered.connect(self.run_snapshooter)
         self.layers_panel_actions.append(self.action_snapshots_layers_panel)
+
+        self.action_additional_actions = QAction(
+            QIcon(additional_actions_icon_path),
+            self.tr("Additionals actions"),
+            parent=self.iface.mainWindow(),
+        )
+        self.layers_panel_actions.append(self.action_additional_actions)
+
+        self.action_additional_actions.setMenu(self._get_additional_actions_menu())
 
         layers_panel_toolbar = self._get_layers_panel_toolbar()
 
@@ -229,6 +350,32 @@ class LayerTreeTools:
 
         self.first_start = True
 
+    def reload_all_layers(self):
+        for group in tools.get_all_groups():
+            additional_actions.reload_layers_in_group(group)
+
+    def reload_layers_in_selected_groups(self):
+        for group in tools.get_selected_groups():
+            additional_actions.reload_layers_in_group(group)
+
+    def reload_selected_layers(self):
+        for layer in tools.get_selected_layers():
+            tools.reload_layer(layer)
+
+    def toggle_nodes_feature_count_on_selected_nodes(self, state: bool):
+        for node in tools.get_selected_nodes():
+            if tools.is_node_a_group(node):
+                continue
+            tools.toggle_feature_count(node, state)
+
+    def toggle_nodes_feature_count_in_selected_groups(self, state: bool):
+        for group in tools.get_selected_groups():
+            additional_actions.toggle_all_layers_in_group_feature_count(group, state)
+
+    def toggle_all_nodes_feature_count(self, state: bool):
+        for group in tools.get_all_groups():
+            additional_actions.toggle_all_layers_in_group_feature_count(group, state)
+
     def _get_layers_panel_toolbar(self):
         return self.iface.mainWindow().findChild(QDockWidget, "Layers").findChild(QToolBar)
 
@@ -247,7 +394,6 @@ class LayerTreeTools:
                 layers_panel_toolbar.removeAction(action)
 
         self.iface.removeToolBarIcon(self.toolbutton_action)
-
 
     def run(self):
         """Run method that performs all the real work"""

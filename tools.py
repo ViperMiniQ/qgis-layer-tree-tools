@@ -468,3 +468,17 @@ def set_node_visibility(node: QgsLayerTreeNode, state: bool = True):
         QgsProject.instance().layerTreeRoot().findLayer(node.id()).setItemVisibilityChecked(bool(state))
     except Exception as e:
         pass
+
+
+def toggle_feature_count(tree_layer: QgsLayerTreeLayer, state: bool = True):
+    if not isinstance(tree_layer, QgsLayerTreeLayer):
+        return False
+    tree_layer.setCustomProperty("showFeatureCount", state)
+    return True
+
+
+def reload_layer(layer: QgsLayerTreeLayer):
+    if is_node_a_layer(layer):
+        layer = layer.layer()
+    layer.reload()
+    layer.triggerRepaint()
