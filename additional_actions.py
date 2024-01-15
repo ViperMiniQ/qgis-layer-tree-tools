@@ -27,3 +27,11 @@ def reload_layers_in_group(group: QgsLayerTreeGroup):
     for node in group.children():
         if tools.is_node_a_layer(node):
             tools.reload_layer(node)
+
+
+def commit_changes_to_layers_in_group(group: QgsLayerTreeGroup):
+    for node in group.children():
+        if not tools.is_node_a_layer(node):
+            continue
+        layer = node.layer()
+        tools.commit_changes_to_layer(layer)

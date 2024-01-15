@@ -173,6 +173,33 @@ class LayerTreeTools:
 
         return action
 
+    def _create_truncate_action(self, parent):
+        truncate_menu = QMenu()
+
+        truncate_all_layers = QAction(
+            self.tr("Delete features in all layers"),
+            parent=truncate_menu
+        )
+        truncate_all_layers.triggered.connect(self.truncate_all_layers)
+        truncate_menu.addAction(truncate_all_layers)
+
+        truncate_menu.addSeparator()
+
+        truncate_selected_layers = QAction(
+            self.tr("Delete all features in selected layer(s)"),
+            parent=truncate_menu
+        )
+        truncate_selected_layers.triggered.connect(self.truncate_selected_layers)
+        truncate_menu.addAction(truncate_selected_layers)
+
+        truncate_action = QAction(
+            self.tr("Truncate (delete features in vector layers)"),
+            parent=parent
+        )
+        truncate_action.setMenu(truncate_menu)
+
+        return truncate_action
+
     def _create_feature_count_action(self, parent):
         toggle_feature_count_menu = QMenu()
 
@@ -236,6 +263,43 @@ class LayerTreeTools:
 
         return toggle_feature_count_action
 
+    def _create_commit_changes_action(self, parent):
+        commit_changes_menu = QMenu()
+
+        commit_changes_all_layers = QAction(
+            self.tr("Commit changes (all layers)"),
+            parent=commit_changes_menu
+        )
+        commit_changes_all_layers.triggered.connect(self.commit_changes_to_all_layers)
+        commit_changes_menu.addAction(commit_changes_all_layers)
+
+        commit_changes_menu.addSeparator()
+
+        commit_changes_selected_layers_in_selected_groups = QAction(
+            self.tr("Commit changes (layers in selected group(s))"),
+            parent=commit_changes_menu
+        )
+        commit_changes_selected_layers_in_selected_groups.triggered.connect(
+            self.commit_changes_to_layers_in_selected_groups)
+        commit_changes_menu.addAction(commit_changes_selected_layers_in_selected_groups)
+
+        commit_changes_menu.addSeparator()
+
+        commit_changes_selected_layers = QAction(
+            self.tr("Commit changes (selected layers)"),
+            parent=commit_changes_menu
+        )
+        commit_changes_selected_layers.triggered.connect(self.commit_changes_to_selected_layers)
+        commit_changes_menu.addAction(commit_changes_selected_layers)
+
+        commit_changes_action = QAction(
+            self.tr("Commit changes"),
+            parent=parent
+        )
+        commit_changes_action.setMenu(commit_changes_menu)
+
+        return commit_changes_action
+
     def _create_reload_action(self, parent):
         reload_layers_menu = QMenu()
 
@@ -274,10 +338,48 @@ class LayerTreeTools:
         additional_actions_menu = QMenu()
 
         additional_actions_menu.addAction(self._create_feature_count_action(additional_actions_menu))
+        additional_actions_menu.addSeparator()
 
         additional_actions_menu.addAction(self._create_reload_action(additional_actions_menu))
+        additional_actions_menu.addSeparator()
+
+        additional_actions_menu.addAction(self._create_truncate_action(additional_actions_menu))
+        additional_actions_menu.addSeparator()
+
+        additional_actions_menu.addAction(self._create_commit_changes_action(additional_actions_menu))
 
         return additional_actions_menu
+
+    def commit_changes_to_selected_layers(self):
+        for layer in tools.get_selected_layers():
+            tools.commit_changes_to_layer(layer)
+
+    def commit_changes_to_layers_in_selected_groups(self):
+        for group in tools.get_selected_groups():
+            additional_actions.commit_changes_to_layers_in_group(group)
+
+    def commit_changes_to_all_layers(self):
+        for group in tools.get_all_groups():
+            additional_actions.commit_changes_to_layers_in_group(group)
+
+    def truncate_all_layers(self):
+        if not tools.show_yes_no_message('Are you sure you want to truncate all layers?\n\nWARNING: This action cannot be reversed.'):
+            return
+
+        for group in tools.get_all_groups():
+            for node in group.children():
+                if tools.is_node_a_layer(node):
+                    layer = node.layer()
+                    if tools.is_layer_a_vector_layer(layer):
+                        tools.truncate_layer(layer)
+
+    def truncate_selected_layers(self):
+        if not tools.show_yes_no_message('Are you sure you want to truncate selected layers?\n\nWARNING: This action cannot be reversed.'):
+            return
+
+        for layer in tools.get_selected_layers():
+            if tools.is_layer_a_vector_layer(layer):
+                tools.truncate_layer(layer)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""

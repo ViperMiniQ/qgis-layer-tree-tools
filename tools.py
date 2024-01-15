@@ -482,3 +482,14 @@ def reload_layer(layer: QgsLayerTreeLayer):
         layer = layer.layer()
     layer.reload()
     layer.triggerRepaint()
+
+
+def truncate_layer(layer: QgsVectorLayer):
+    layer.dataProvider().truncate()
+
+
+def commit_changes_to_layer(layer):
+    """QgsVectorLayer | QgsRasterLayer"""
+    if not layer.isEditable():
+        return
+    layer.commitChanges()
