@@ -21,6 +21,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+import time
+
 from PyQt5.QtWidgets import QMenu, QAction
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('127.0.0.1', port=53100, stdoutToServer=True, stderrToServer=True)
@@ -40,6 +42,8 @@ import os.path
 
 from . import additional_actions
 from . import tools
+
+from . import help_render
 
 
 class LayerTreeTools:
@@ -434,23 +438,34 @@ class LayerTreeTools:
             self.tr('Take tree snapshots'),
             self.iface.mainWindow()
         )
+        self.action_help = QAction(
+            self.tr('Help'),
+            self.iface.mainWindow()
+        )
 
         self.action_sorter.triggered.connect(self.run)
         self.action_snapshooter.triggered.connect(self.run_snapshooter)
+        self.action_help.triggered.connect(self.show_help)
 
         menu = self.toolbutton.menu()
 
         menu.addAction(self.action_sorter)
         menu.addAction(self.action_snapshooter)
+        menu.addAction(self.action_help)
 
         self.toolbutton.setDefaultAction(self.action_sorter)
 
         self.actions.append(self.action_sorter)
         self.actions.append(self.action_snapshooter)
+        self.actions.append(self.action_help)
 
         # /plugins toolbar
 
         self.first_start = True
+
+    def show_help(self):
+        self.w = help_render.HelpDialog()
+        self.w.show()
 
     def reload_all_layers(self):
         for group in tools.get_all_groups():

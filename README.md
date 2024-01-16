@@ -1,35 +1,41 @@
 # Layer Tree Tools (sort, group, snapshot)
-
+&nbsp;
 ## SORTING
-
-Options:
+&nbsp;
+Options:  
+&nbsp;
   * root only
     
-    Sorts nodes in root only.
+    + Sorts nodes in root only.
     
   * order within all groups (root included)
-
-    Sorts nodes in all groups, including root.
-
+  
+    + Sorts nodes in all groups, including root.
+    
   * within selected group(s)
-
-    Sorts nodes only in selected group(s).  
-    Does not sort nodes in sub-groups.
-
+  
+    + Sorts nodes only in selected group(s).  
+    + Does not sort nodes in sub-groups.
+    
   * extract and sort all in root
-
-    Moves all layers to root and sorts them.  
-    Groups get deleted.
-
+  
+    + Moves all layers to root and sorts them.  
+    + Groups get deleted.
+<!-- -->
+&nbsp;
 ### NAME
-
-Sorts layers based on their name.
-
-Options:
-  * A-Z
-  * Z-A
-
+  
+Sorts layers based on their name.  
+&nbsp;  
+Options:  
+&nbsp;  
+  * A-Z  
+  * Z-A  
+<!-- -->
+&nbsp;
 #### NAME SORTING EXAMPLE
+  
+  
 <pre>
     
 ├── SERBIA                
@@ -44,7 +50,7 @@ Options:
     └── Split  
   
 </pre>
-
+&nbsp;  
 <pre>
   
           root only           .  order within all groups (root included)  .      selected group(s) only    .  extract all and sort in root
@@ -61,18 +67,21 @@ Options:
     └── Kragujevac            .      └── Novi Sad                         .      └── Zagreb                .
 
 </pre>
-
+  
+  
 ### GEOMETRY  
-
-Sorts layers based on their geometry.
-
-__NOTE__: even though RASTERS and GROUPS are not geometry types, they are treated as such when sorting in order to provide the user more flexibility on the type order.
-
+&nbsp;  
+Sorts layers based on their geometry.  
+&nbsp;  
+__NOTE__: even though RASTERS and GROUPS are not geometry types, they are treated as such when sorting in order to provide the user more flexibility on the type order.  
+&nbsp;  
 Options:
- * list order of geometries [polygon, line, point, raster, groups]
-
+ * list order of geometries 
+    + polygon, line, point, raster, groups  
+<!-- -->
+&nbsp;  
 #### GEOMETRY EXAMPLE
-
+&nbsp;  
 <pre>
   
 ├── SERBIA
@@ -91,7 +100,7 @@ Options:
 └── Bosnia and Herzegovina (raster)
   
 </pre>
-
+&nbsp;  
 <pre>
   
 Order example:
@@ -102,8 +111,7 @@ Order example:
     5.) raster
   
 </pre>
-
-
+&nbsp;  
 <pre>
   
             root only                .  order within all groups (root included)  .          selected group(s) only       .  extract all and sort in root
@@ -124,19 +132,20 @@ Order example:
 └── Bosnia and Herzegovina (raster)  .  └── Bosnia and Herzegovina (raster)      .  ├── Bosnia and Herzegovina (raster)  .
 
 </pre>
-
+&nbsp;  
 ### FEATURE COUNT
-
-Sorts layers based on their feature count. 
-
+&nbsp;  
+Sorts layers based on their feature count.  
+&nbsp;  
 Options:
   * highest to lowest
-  * lowest to highest
-
-*Only vector layers have feature count.
-
+  * lowest to highest  
+<!-- -->
+&nbsp;  
+*Only vector layers have feature count.  
+&nbsp;  
 #### FEATURE COUNT EXAMPLE
-
+&nbsp;  
 <pre>
   
 ├── SERBIA
@@ -154,7 +163,7 @@ Options:
 ├── Mostar (105,797)
   
 </pre>
-
+&nbsp;  
 <pre>
 
           root only           .  order within all groups (root included)  .    selected group(s) only      .  extract all and sort in root
@@ -174,19 +183,20 @@ Options:
 │   └── Split (161,312)       .  │   └── Osijek (96,848)                  .  ├── Mostar (105,797)          .
   
 </pre>
-
+&nbsp;  
 ### ENCODING
-
-Sorty layers based on their encoding.
-
+&nbsp;  
+Sorty layers based on their encoding.  
+&nbsp;  
 Options:
-  * list order of all encodings in the layer tree
-
-*Only vector layers have feature count.
-**Memory layers don't have encoding and their encoding is reported as 'None' in the list.
-
+  * list order of all encodings in the layer tree  
+<!-- -->
+&nbsp;  
+*Only vector layers have feature count.  
+**Memory layers don't have encoding and their encoding is reported as 'None' in the list.   
+&nbsp;  
 #### ENCODING EXAMPLE
-
+&nbsp;  
  <pre>
      
 ├── SERBIA
@@ -204,7 +214,7 @@ Options:
 ├── Mostar (UTF-8)
    
  </pre>
-
+&nbsp;  
  <pre>
    
 Order example:
@@ -215,7 +225,7 @@ Order example:
      5.) ISO 8859-1
    
  </pre>
-
+&nbsp;  
  <pre>
 
         root only             .  order within all groups (root included)  .       selected group(s) only   .  extract all and sort in root
@@ -235,18 +245,19 @@ Order example:
 │   └── Osijek (UTF-16)       .  │   └── Rijeka (ISO 8859-1)              .  ├── Mostar (UTF-8)            .
    
  </pre>      
- 
+&nbsp;  
 ### FILETYPE
-
-Sorts layers based on their extension.
-
-Options:
-  * list order of extensions of loaded files in layer tree
-
-*Memory layers don't exist as files on drive and their filetype is reported as 'memory'.
-
+&nbsp;  
+Sorts layers based on their extension.  
+&nbsp;  
+Options:  
+  * list order of extensions of loaded files in layer tree  
+<!-- -->
+&nbsp;  
+*Memory layers don't exist as files on drive and their filetype is reported as 'memory'.  
+&nbsp;  
 #### FILETYPE EXAMPLE
-
+&nbsp;  
 <pre>
     
 ├── SERBIA
@@ -263,13 +274,13 @@ Options:
 ├── Banja Luka.csv
 ├── Mostar.shp
 
-Order example:
-    1.) .tif
-    2.) .geojson
-    3.) .shp
-    4.) .csv
+Order example:  
+    1.) .tif  
+    2.) .geojson  
+    3.) .shp  
+    4.) .csv  
 </pre>
-
+&nbsp;  
 <pre>
 
         root only             .  order within all groups (root included)  .    selected group(s) only      .  extract all and sort in root
@@ -289,18 +300,18 @@ Order example:
 │   └── Rijeka.csv            .  │   └── Rijeka.csv                       .  ├── Mostar.shp                .
   
 </pre>
-
+&nbsp;  
 ### STORAGE TYPE
-
-Sorty layers based on their storage type as reported by QGIS.
-
-Options:
-  * list order of storage types of loaded layers in layer tree
-
+&nbsp;  
+Sorty layers based on their storage type as reported by QGIS.  
+&nbsp;  
+Options:  
+  * list order of storage types of loaded layers in layer tree  
+<!-- -->
+&nbsp;  
 #### STORAGE EXAMPLE
-
+&nbsp;  
 <pre>
-TREE EXAMPLE
 
 ├── SERBIA
 │   ├── Belgrade (ESRI Shapefile)
@@ -317,7 +328,7 @@ TREE EXAMPLE
 ├── Mostar (ESRI Shapefile)
     
 </pre>
-
+&nbsp;  
 <pre>
 
 Order example:
@@ -327,7 +338,7 @@ Order example:
     4.) SQLite
     
 </pre>
-
+&nbsp;  
 <pre>
 
           root only                .  order within all groups (root included)  .        selected group(s) only       .  extract all and sort in root
@@ -347,19 +358,20 @@ Order example:
 │   └── Rijeka (CSV)               .  │   └── Osijek (SQLite)                  .  ├── Mostar (ESRI Shapefile)        .
   
 </pre>
-
+&nbsp;  
 ### SIZE ON DISK
-
-Sorts layers based on their file size on disk.
-
-Options:
-  * ascending
-  * descending
-
-*All ESRI Shapefile extensions are included in the sum when determining shapefile size.
-
+&nbsp;  
+Sorts layers based on their file size on disk.  
+&nbsp;  
+Options:  
+  * ascending  
+  * descending  
+<!-- -->
+&nbsp;  
+*All ESRI Shapefile extensions are included in the sum when determining shapefile size.    
+&nbsp;
 #### SIZE ON DISK EXAMPLE
-
+&nbsp;  
 <pre>
 
 ├── SERBIA
@@ -377,9 +389,9 @@ Options:
 ├── Sarajevo (10 MB)
 
 </pre>
-
+&nbsp;  
 <pre>
-  x most to less
+    used option:  [x] most to less
 </pre>
 
 <pre>
@@ -401,10 +413,11 @@ Options:
 │   └── Osijek (6 MB)      .  │   └── Zagreb (1 MB)                    .  ├── Sarajevo (10 MB)          .
   
 </pre>
-
+&nbsp;  
 ### LAST MODIFIED
-
+&nbsp;  
 <pre>
+
           root only              .  order within all groups (root included)  .      selected group(s) only       .  extract all and sort in root
                                  .                                           .                                   .
 ├── SERBIA                       .  ├── Sarajevo (2024-04-06)                .  ├── SERBIA                       .  ├── Niš (2024-01-11)
@@ -422,9 +435,9 @@ Options:
 ├── Sarajevo (2024-04-06)        .  │   └── Osijek (2024-12-02)              .  ├── Sarajevo (2024-04-06)        .
   
 </pre>
-
+&nbsp;  
 ### POSITION
-
+&nbsp;  
 <pre>
 (lat min, lat max, lon min, lon max)
   
@@ -444,10 +457,10 @@ Options:
 └── Mongolia (41.5800276, 52.1496, 87.73762, 119.931949)
   
 </pre>
-
+&nbsp;  
 <pre>
 
-  bottom to top
+    used option: [x] bottom to top
 
           root only             .  order within all groups (root included)  .      selected group(s) only      .  extract all and sort in root
                                 .                                           .                                  .
@@ -467,126 +480,135 @@ Options:
 │   └── Madagascar              .      └── Algeria                          .  └── Mongolia                    .
   
 </pre>
-
+&nbsp;  
 ## GROUPING
-
+&nbsp;  
 Creates groups with the layers sharing the same selected attribute(s).  
 Groups are created in order of encountering unique attributes (from top to bottom).  
-
-Options:
-  * root only
-  * group within all groups
-  * within selected group(s)
-  * extract all and group in root
-
-
+&nbsp;  
+Options:  
+  * root only  
+  * group within all groups  
+  * within selected group(s)  
+  * extract all and group in root  
+<!-- -->
+&nbsp;  
 ### NAME
-
+&nbsp;  
 Groups layers of the same name.  
-Names must match exactly.
-
-Options:
+Names must match exactly.  
+&nbsp;  
+Options:  
+   
+  * Nodes containing same substring can be grouped together.  
   
-  * Nodes containing same substring can be grouped together.
-  
-  * Groups (group names) can be ignored when grouping by name.
-
+  * Groups (group names) can be ignored when grouping by name.  
+<!-- -->
+&nbsp;  
 ### GEOMETRY
-
-Groups layers based on their geometry.
-
-Options:
-  * not all geometries have to be grouped, and option for each of the types allows you to select which ones you want to group
-
-__NOTE__: grouping multiple geometry types in the same group is not possible.
-
-### FEATURE COUNT
-
-Groups layers with the same feature count.
-
-__NOTE__: only vector layers have feature count.
-
-### STORAGE TYPE
-
-Groups layers with the same storage type.
-
-__NOTE__: only vector layers have storage type.
-
-### POSITION
-
-Groups layers of the same extent.  
-
-__NOTE__: Extent must match completely.
-
-### LAST MODIFIED
-
-Groups layers of the same last modified date.
-
-Options:
-
-  * day
-
-    Group layers which have been last modified in the same day (does not mean in the last 24h).
-    
-  * month
-
-    Group layers which have been last modified in the same month (does not mean within 30 days). 
+&nbsp;  
+Groups layers based on their geometry.  
+&nbsp;  
+Options:  
+  * not all geometries have to be grouped, and option for each of the types allows you to select which ones you want to group  
+<!-- -->
+&nbsp;  
+__NOTE__: grouping multiple geometry types in the same group is not possible.    
+&nbsp;  
+### FEATURE COUNT  
+&nbsp;  
+Groups layers with the same feature count.  
+&nbsp;  
+__NOTE__: only vector layers have feature count.   
+&nbsp;  
   
-  * year
-
-    Group layers which have been last modified in the same year (does not mean within 1 year).
-
-### SIZE ON DISK
-
-Groups layers based on the provided step in megabytes.
-If the step is set to 0, size on disk must match completely in order to be grouped together.
-
-Memory layers don't have size on disk property.
-
-All ESRI Shapefile extensions are taken into account when getting size on disk of shapefile.
-
+### STORAGE TYPE  
+&nbsp;  
+Groups layers with the same storage type.  
+&nbsp;  
+__NOTE__: only vector layers have storage type.  
+&nbsp;  
+### POSITION  
+&nbsp;  
+Groups layers of the same extent.    
+&nbsp;  
+__NOTE__: Extent must match completely.  
+&nbsp;  
+### LAST MODIFIED  
+&nbsp;  
+Groups layers of the same last modified date.  
+&nbsp;  
+Options:  
+  
+  * day  
+  
+    + Group layers which have been last modified in the same day (does not mean in the last 24h).  
+  
+  * month  
+  
+    + Group layers which have been last modified in the same month (does not mean within 30 days).   
+  
+  * year  
+  
+    + Group layers which have been last modified in the same year (does not mean within 1 year).  
+<!-- -->
+&nbsp;  
+### SIZE ON DISK  
+&nbsp;  
+Groups layers based on the provided step in megabytes.  
+If the step is set to 0, size on disk must match completely in order to be grouped together.  
+&nbsp;  
+Memory layers don't have size on disk property.    
+&nbsp;  
+  
+*All ESRI Shapefile extensions are taken into account when getting size on disk of shapefile.  
+&nbsp;  
 ### FILETYPE
-
-Groups layers of the same filetype.
-
-
-## SNAPSHOT
-
-Snapshot is a simple copy of the current layer tree.  
+&nbsp;  
+Groups layers of the same filetype.  
+&nbsp;  
+## SNAPSHOT  
+&nbsp;  
+Snapshot is a simple copy of the current layer tree.    
 Raster layers are copied by reference (absolute filepath), while for vector layers there is an option to either save by reference or by full copy of the layer attributes.  
 Full vector layer copy includes layer attributes, features (feature attributes and geometry) and crs.  
 Memory layers are regardless of the option for standard vector layers fully copied and saved to file.  
-
-.snp (snapshot) file is saved in the plugin directory in /Snapshots/.
-
-.snp files can be shared among other instances of QGIS or other PCs (supported from QGIS 3.0 version). 
-As the snapshot stores an absolute path, there is no option to 'search for' or 'recover' the new filepath. 
-If a load fails on some of the layers, a window containing name, type and datasource will display information of the layers that have failed to load.
-
-Snapshot does not contain other QGIS layer properties, such as symbology and visibility.
-
+&nbsp;  
+.snp (snapshot) file is saved in the plugin directory in /Snapshots/.  
+&nbsp;  
+.snp files can be shared among other instances of QGIS or other PCs (supported from QGIS 3.0 version).   
+As the snapshot stores an absolute path, there is no option to 'search for' or 'recover' the new filepath.   
+If a load fails on some of the layers, a window containing name, type and datasource will display information of the layers that have failed to load.  
+&nbsp;  
+Snapshot does not contain other QGIS layer properties, such as symbology and visibility.  
+&nbsp;  
 ### CREATING SNAPSHOT
-
-* Include rasters
-
-   If the option is ticked, raster absolute filepaths will be saved to a snapshot file.
+&nbsp;  
+* Include rasters  
   
-* Include vector layers
-
-  If the option is ticked, vector layers absolute filepaths will be saved to a snapshot file.
-  Memory layers are fully copied and saved.
-
-* Copy all vector layers to memory
-
-  If the option is ticked, instead of saving the absolute filepath, layer properties and features are to a file.
-  Saved properties are: layer crs, layer geometry type, layer name, layer attributes, layer features (feature attributes and feature geometry)
-
+   + If the option is ticked, raster absolute filepaths will be saved to a snapshot file.  
+    
+* Include vector layers  
+  
+  + If the option is ticked, vector layers absolute filepaths will be saved to a snapshot file.  
+  + Memory layers are fully copied and saved.  
+  
+* Copy all vector layers to memory  
+  
+  + If the option is ticked, instead of saving the absolute filepath, layer properties and features are to a file.  
+  + Saved properties are: layer crs, layer geometry type, layer name, layer attributes, layer features (feature attributes and feature geometry)  
+<!-- -->
+&nbsp;  
+  
 ### LOADING SNAPSHOT
-
-* Replace entire tree with the snapshot
-
-   Clears entire layer tree and loads the snapshot
-
-* Load snapshot into a separate group in root
-
-   Loads the snapshot in newly created 'snapshot _snapshot name_' group
+&nbsp;  
+  
+* Replace entire tree with the snapshot  
+  
+   + Clears entire layer tree and loads the snapshot  
+  
+* Load snapshot into a separate group in root  
+  
+   + Loads the snapshot in newly created 'snapshot _snapshot name_' group  
+<!-- -->
+&nbsp;  
