@@ -256,6 +256,8 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if self.radioButtonSnapshotToNewGroup.isChecked():
             starting_group = tools.create_group(starting_group, f'snapshot {details["name"]}')
+        else:
+            tools.clear_layer_tree()
 
         report = []
 

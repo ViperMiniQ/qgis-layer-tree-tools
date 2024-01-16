@@ -579,8 +579,8 @@ Memory layers are regardless of the option for standard vector layers fully copi
 .snp files can be shared among other instances of QGIS or other PCs (supported from QGIS 3.0 version).   
 As the snapshot stores an absolute path, there is no option to 'search for' or 'recover' the new filepath.   
 If a load fails on some of the layers, a window containing name, type and datasource will display information of the layers that have failed to load.  
-&nbsp;  
-Snapshot does not contain other QGIS layer properties, such as symbology and visibility.  
+
+As of ver 1.1, snapshots include symbology and visibility information.
 &nbsp;  
 ### CREATING SNAPSHOT
 &nbsp;  
@@ -610,5 +610,24 @@ Snapshot does not contain other QGIS layer properties, such as symbology and vis
 * Load snapshot into a separate group in root  
   
    + Loads the snapshot in newly created 'snapshot _snapshot name_' group  
+<!-- -->
+&nbsp;  
+## ADDITIONAL ACTIONS  
+&nbsp;  
+Alongside shortcuts for Sorting and grouping and Snapshost, additional actions allow fast access to some common functions:
+&nbsp;  
+* Actions:
+  + Toggle feature count  
+  + Reload layers  
+  + Truncate (delete features in layers)
+  + Commit changes
+<!-- -->
+&nbsp;  
+Each of the actions can be done on:
+&nbsp;  
+- individual selected layers
+- layers in selected group(s)
+    + does not include sub-groups
+- all layers
 <!-- -->
 &nbsp;  
