@@ -54,8 +54,10 @@ class Snapshooter(QgsTask):
         self.vector_layers_in_memory = vector_layers_in_memory
 
         self.callback_func = callback_func
+        self.task_done = False
 
     def run(self) -> bool:
+        check = False
         try:
             self._build_dictionary(
                 self.new_snapshot,
@@ -65,9 +67,12 @@ class Snapshooter(QgsTask):
                 self.vector_layers_in_memory,
                 self.snapshot_layer_symbology
             )
-            return True
+            check = True
         except Exception:
-            return False
+            check = False
+        finally:
+            self.finished(check)
+            return check
 
     def _generate_snapshot_id(self, time: datetime.datetime) -> str:
         return (self.name
@@ -79,6 +84,9 @@ class Snapshooter(QgsTask):
         )
 
     def finished(self, result: bool):
+        if self.task_done:
+            return
+
         if not result:
             if self.callback_func is not None:
                 self.callback_func({})
@@ -104,6 +112,8 @@ class Snapshooter(QgsTask):
 
         if self.callback_func is not None:
             self.callback_func(snapshot_details)
+
+        self.task_done = True
 
     @classmethod
     def get_all_snapshots_details(cls):
