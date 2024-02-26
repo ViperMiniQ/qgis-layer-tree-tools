@@ -23,7 +23,7 @@
       <enum>Qt::NoFocus</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="sort">
       <attribute name="title">
@@ -506,7 +506,7 @@
        <item row="1" column="0">
         <widget class="QStackedWidget" name="stackedWidgetGroupPages">
          <property name="currentIndex">
-          <number>6</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="GroupName">
           <layout class="QGridLayout" name="gridLayout_14">
@@ -578,6 +578,16 @@
               <enum>QFrame::Raised</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_19">
+              <item row="1" column="0">
+               <widget class="QCheckBox" name="checkBoxGroupMatchingRegex">
+                <property name="text">
+                 <string>group nodes matching regex pattern</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEditGroupContainingSubstring"/>
+              </item>
               <item row="0" column="0">
                <widget class="QCheckBox" name="checkBoxGroupContainingSubstring">
                 <property name="text">
@@ -585,21 +595,8 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEditGroupContainingSubstring"/>
-              </item>
               <item row="1" column="1">
-               <spacer name="verticalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
+               <widget class="QLineEdit" name="lineEditGroupMatchingRegex"/>
               </item>
              </layout>
             </widget>
@@ -998,9 +995,9 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="positionOrder"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="nameOrder"/>
   <buttongroup name="radioSpecials"/>
+  <buttongroup name="positionOrder"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

@@ -124,14 +124,28 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
             },
         }
 
-        self.checkBoxGroupContainingSubstring.stateChanged.connect(self.state_changed_group_containing_substring)
+        self.checkBoxGroupContainingSubstring.stateChanged.connect(self._manage_additional_actions_visibility)
+        self.checkBoxGroupMatchingRegex.stateChanged.connect(self._manage_additional_actions_visibility)
 
-        self.state_changed_group_containing_substring()
+        self._manage_additional_actions_visibility()
 
         self.set_combobox_items()
         self.set_default_listbox_geometries()
 
         self.tabWidget.setCurrentIndex(0)
+
+    def _manage_additional_actions_visibility(self):
+        if self.checkBoxGroupMatchingRegex.isChecked():
+            self.checkBoxGroupContainingSubstring.setDisabled(True)
+        else:
+            self.checkBoxGroupContainingSubstring.setDisabled(False)
+        self._state_changed_group_containing_substring()
+
+        if self.checkBoxGroupContainingSubstring.isChecked():
+            self.checkBoxGroupMatchingRegex.setDisabled(True)
+        else:
+            self.checkBoxGroupMatchingRegex.setDisabled(False)
+        self._state_changed_group_matching_regex()
 
     def _refresh_encodings(self):
         encodings = tools.get_encodings()
@@ -211,10 +225,24 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if self.get_group_containing_substring():
             substring = self.get_group_substring()
+
             if not substring:
                 return
+
             for group in reversed(groups):
                 grouper.group_containing_substring(group, substring, ignore_groups, group_singles)
+
+            return
+
+        if self.get_group_matching_regex():
+            regex = self.get_group_regex()
+
+            if not regex:
+                return
+
+            for group in reversed(groups):
+                grouper.group_by_name_matching_regex_patter(group, regex, ignore_groups, group_singles)
+
             return
 
         for group in reversed(groups):
@@ -508,7 +536,14 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
     def get_group_singles(self) -> bool:
         return self.checkBoxGroupSingles.isChecked()
 
-    def state_changed_group_containing_substring(self, event=None):
+    def _state_changed_group_matching_regex(self, event=None):
+        if self.checkBoxGroupMatchingRegex.isChecked():
+            self.lineEditGroupMatchingRegex.setDisabled(False)
+            return
+
+        self.lineEditGroupMatchingRegex.setDisabled(True)
+
+    def _state_changed_group_containing_substring(self, event=None):
         if self.checkBoxGroupContainingSubstring.isChecked():
             self.lineEditGroupContainingSubstring.setDisabled(False)
             return
@@ -518,8 +553,14 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
     def get_group_containing_substring(self) -> bool:
         return self.checkBoxGroupContainingSubstring.isChecked()
 
+    def get_group_matching_regex(self) -> bool:
+        return self.checkBoxGroupMatchingRegex.isChecked()
+
     def get_group_substring(self) -> str:
         return self.lineEditGroupContainingSubstring.text()
+
+    def get_group_regex(self) -> str:
+        return self.lineEditGroupMatchingRegex.text()
 
     def get_geometries_to_group(self) -> List[int]:
         included_geometries = []

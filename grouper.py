@@ -10,6 +10,8 @@ from . import tools
 from . import definitions
 from typing import Dict, List
 
+import re
+
 
 # TODO: make a group for unique values?
 
@@ -32,7 +34,7 @@ def group_same_name(group: QgsLayerTreeGroup, ignore_groups: bool = False, group
         nodes[name] = [node]
 
     for name, values in nodes.items():
-        if len(values) == 1 and not group_single:
+        if len(values) <= 1 and not group_single:
             continue
         tools.move_nodes_to_group(group=tools.create_group(group, name), nodes=values)
 
@@ -123,7 +125,7 @@ def group_same_filetype(group: QgsLayerTreeGroup, group_singles: bool = False) -
         same_values[file_extensions].append(node)
 
     for name, values in same_values.items():
-        if len(values) == 1 and not group_singles:
+        if len(values) <= 1 and not group_singles:
             continue
         tools.move_nodes_to_group(tools.create_group(group, name), values)
 
@@ -152,7 +154,7 @@ def group_same_position(group: QgsLayerTreeGroup, group_singles: bool = False) -
             same_values[value].append(node)
 
     for key, nodes in same_values.items():
-        if len(nodes) == 1 and not group_singles:
+        if len(nodes) <= 1 and not group_singles:
             continue
         tools.move_nodes_to_group(tools.create_group(group, key), nodes)
 
@@ -181,7 +183,7 @@ def group_same_feature_count(group: QgsLayerTreeGroup, group_singles: bool = Fal
             same_values[count].append(node)
 
     for key, nodes in same_values.items():
-        if len(nodes) == 1 and not group_singles:
+        if len(nodes) <= 1 and not group_singles:
             continue
         tools.move_nodes_to_group(tools.create_group(group, key), nodes)
 
@@ -213,7 +215,7 @@ def group_same_storage_type(group: QgsLayerTreeGroup, group_singles: bool = Fals
             same_values[storage_type].append(node)
 
     for key, nodes in same_values.items():
-        if len(nodes) == 1 and not group_singles:
+        if len(nodes) <= 1 and not group_singles:
             continue
         tools.move_nodes_to_group(tools.create_group(group, key), nodes)
 
@@ -303,7 +305,7 @@ def group_same_encoding(group: QgsLayerTreeGroup, group_singles: bool = False) -
             same_values[encoding].append(node)
 
     for key, nodes in same_values.items():
-        if len(nodes) == 1 and not group_singles:
+        if len(nodes) <= 1 and not group_singles:
             continue
         tools.move_nodes_to_group(tools.create_group(group, key), nodes)
 
@@ -342,5 +344,26 @@ def group_same_size_on_disk(group: QgsLayerTreeGroup, step: float, group_singles
         if len(nodes) <= 1 and not group_singles:
             continue
         tools.move_nodes_to_group(tools.create_group(group, key), nodes)
+
+    return True
+
+
+def group_by_name_matching_regex_patter(group: QgsLayerTreeGroup, regex: str, ignore_groups: bool, group_singles: bool = False) -> bool:
+    if not tools.is_node_a_group(group):
+        return False
+
+    nodes = []
+
+    for node in group.children():
+        if ignore_groups and tools.is_node_a_group(node):
+            continue
+
+        if re.match(regex, node.name()) is not None:
+            nodes.append(node)
+
+    if len(nodes) <= 1 and not group_singles:
+        return True
+
+    tools.move_nodes_to_group(tools.create_group(group, regex), nodes)
 
     return True
