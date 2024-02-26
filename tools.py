@@ -299,15 +299,17 @@ def delete_all_groups_and_move_nodes_to_root():
     groups = get_all_groups()
     root = groups[0]
 
-    nodes = []
     for group in groups[1:]:
-        if nodes:
-            move_nodes_to_group(root, nodes)
+
         nodes = []
+
         for node in group.children():
             if node in groups:
                 continue
             nodes.append(node)
+
+        if nodes:
+            move_nodes_to_group(root, nodes)
 
     for group in reversed(groups[1:]):
         delete_node(group)
