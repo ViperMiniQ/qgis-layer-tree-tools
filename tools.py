@@ -18,7 +18,8 @@ from qgis.core import (
     QgsField,
     NULL,
     QgsApplication,
-    QgsTask
+    QgsTask,
+    QgsFileUtils
 )
 
 from PyQt5.QtCore import QVariant
@@ -495,3 +496,8 @@ def commit_changes_to_layer(layer):
     if not layer.isEditable():
         return
     layer.commitChanges()
+
+
+def get_file_sidecar_files(filepath: str) -> List[str]:
+    """returns list of sidecar files"""
+    return list(QgsFileUtils.sidecarFilesForPath(filepath))
