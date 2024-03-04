@@ -577,5 +577,3 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
             included_geometries.append(definitions.QGS_GROUP_GEOMETRY_TYPE)
 
         return included_geometries
-
-# TODO: filetype shows as '' on sorter - should be memory

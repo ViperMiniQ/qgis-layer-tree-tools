@@ -189,6 +189,15 @@ class LayerTreeTools:
 
         truncate_menu.addSeparator()
 
+        truncate_layers_in_selected_groups = QAction(
+            self.tr("Delete all layers features in selected group(s)"),
+            parent=truncate_menu
+        )
+        truncate_layers_in_selected_groups.triggered.connect(self.truncate_all_layers_in_selected_groups)
+        truncate_menu.addAction(truncate_layers_in_selected_groups)
+
+        truncate_menu.addSeparator()
+
         truncate_selected_layers = QAction(
             self.tr("Delete all features in selected layer(s)"),
             parent=truncate_menu
@@ -203,6 +212,42 @@ class LayerTreeTools:
         truncate_action.setMenu(truncate_menu)
 
         return truncate_action
+
+    def _export_layers_to_dir_action(self, parent):
+        export_layers_to_dir_menu = QMenu()
+
+        export_layers_to_dir_all_layers = QAction(
+            self.tr("Export all layers to directory"),
+            parent=export_layers_to_dir_menu
+        )
+        export_layers_to_dir_all_layers.triggered.connect(self.export_all_layers_to_dir)
+        export_layers_to_dir_menu.addAction(export_layers_to_dir_all_layers)
+
+        export_layers_to_dir_menu.addSeparator()
+
+        export_layers_to_dir_selected_groups = QAction(
+            self.tr("Export layers in selected group(s) to directory"),
+            parent=export_layers_to_dir_menu
+        )
+        export_layers_to_dir_selected_groups.triggered.connect(self.export_layers_in_selected_groups_to_dir)
+        export_layers_to_dir_menu.addAction(export_layers_to_dir_selected_groups)
+
+        export_layers_to_dir_menu.addSeparator()
+
+        export_layers_to_dir_selected_layers = QAction(
+            self.tr("Export selected layers to directory"),
+            parent=export_layers_to_dir_menu
+        )
+        export_layers_to_dir_selected_layers.triggered.connect(self.export_selected_layers_to_dir)
+        export_layers_to_dir_menu.addAction(export_layers_to_dir_selected_layers)
+
+        export_layers_to_dir_action = QAction(
+            self.tr("Export layers to directory"),
+            parent=parent
+        )
+        export_layers_to_dir_action.setMenu(export_layers_to_dir_menu)
+
+        return export_layers_to_dir_action
 
     def _create_feature_count_action(self, parent):
         toggle_feature_count_menu = QMenu()
@@ -351,8 +396,51 @@ class LayerTreeTools:
         additional_actions_menu.addSeparator()
 
         additional_actions_menu.addAction(self._create_commit_changes_action(additional_actions_menu))
+        additional_actions_menu.addSeparator()
+
+        additional_actions_menu.addAction(self._export_layers_to_dir_action(additional_actions_menu))
 
         return additional_actions_menu
+
+    def export_layers_in_selected_groups_to_dir(self):
+        groups = tools.get_selected_groups()
+
+        if not groups:
+            return
+
+        destination_directory = QFileDialog.getExistingDirectory(
+            self.iface.mainWindow(),
+            self.tr("Select directory to export layers to"),
+            options=QFileDialog.ShowDirsOnly
+        )
+
+        for group in groups:
+            additional_actions.export_layers_in_group_to_dir(group, destination_directory + '/')
+
+    def export_selected_layers_to_dir(self):
+        destination_directory = QFileDialog.getExistingDirectory(
+            self.iface.mainWindow(),
+            self.tr("Select directory to export layers to"),
+            options=QFileDialog.ShowDirsOnly
+        )
+
+        if not destination_directory:
+            return
+
+        additional_actions.export_selected_layers_to_dir(destination_directory + '/')
+
+    def export_all_layers_to_dir(self):
+        destination_directory = QFileDialog.getExistingDirectory(
+            self.iface.mainWindow(),
+            self.tr("Select directory to export layers to"),
+            options=QFileDialog.ShowDirsOnly
+        )
+
+        if not destination_directory:
+            return
+
+        for group in tools.get_all_groups():
+            additional_actions.export_layers_in_group_to_dir(group, destination_directory + '/')
 
     def commit_changes_to_selected_layers(self):
         for layer in tools.get_selected_layers():
@@ -370,20 +458,21 @@ class LayerTreeTools:
         if not tools.show_yes_no_message('Are you sure you want to truncate all layers?\n\nWARNING: This action cannot be reversed.'):
             return
 
-        for group in tools.get_all_groups():
-            for node in group.children():
-                if tools.is_node_a_layer(node):
-                    layer = node.layer()
-                    if tools.is_layer_a_vector_layer(layer):
-                        tools.truncate_layer(layer)
+        for group in reversed(tools.get_all_groups()):
+            additional_actions.truncate_all_layers_in_group(group)
 
     def truncate_selected_layers(self):
         if not tools.show_yes_no_message('Are you sure you want to truncate selected layers?\n\nWARNING: This action cannot be reversed.'):
             return
 
-        for layer in tools.get_selected_layers():
-            if tools.is_layer_a_vector_layer(layer):
-                tools.truncate_layer(layer)
+        additional_actions.truncate_selected_layers()
+
+    def truncate_all_layers_in_selected_groups(self):
+        if not tools.show_yes_no_message('Are you sure you want to truncate all layers in selected group(s)?\n\nWARNING: This action cannot be reversed.'):
+            return
+
+        for group in tools.get_selected_groups():
+            additional_actions.truncate_all_layers_in_group(group)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -438,6 +527,12 @@ class LayerTreeTools:
             self.tr('Take tree snapshots'),
             self.iface.mainWindow()
         )
+        self.action_plugin_toolbar_additional_actions = QAction(
+            QIcon(additional_actions_icon_path),
+            self.tr('Additional actions'),
+            self.iface.mainWindow()
+        )
+        self.action_plugin_toolbar_additional_actions.setMenu(self._get_additional_actions_menu())
         self.action_help = QAction(
             self.tr('Help'),
             self.iface.mainWindow()
@@ -451,12 +546,14 @@ class LayerTreeTools:
 
         menu.addAction(self.action_sorter)
         menu.addAction(self.action_snapshooter)
+        menu.addAction(self.action_plugin_toolbar_additional_actions)
         menu.addAction(self.action_help)
 
         self.toolbutton.setDefaultAction(self.action_sorter)
 
         self.actions.append(self.action_sorter)
         self.actions.append(self.action_snapshooter)
+        self.actions.append(self.action_plugin_toolbar_additional_actions)
         self.actions.append(self.action_help)
 
         # /plugins toolbar

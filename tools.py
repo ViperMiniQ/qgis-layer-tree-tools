@@ -1,6 +1,7 @@
 import os.path
 from typing import List, Dict, Tuple
 from datetime import datetime
+from pathlib import Path
 
 from . import definitions
 
@@ -28,6 +29,7 @@ from PyQt5.QtXml import QDomDocument
 from qgis.PyQt.QtWidgets import QMessageBox
 
 from qgis.utils import iface
+from shutil import copyfile
 
 
 def get_layers() -> Dict[str, QgsMapLayer]:
@@ -501,3 +503,46 @@ def commit_changes_to_layer(layer):
 def get_file_sidecar_files(filepath: str) -> List[str]:
     """returns list of sidecar files"""
     return list(QgsFileUtils.sidecarFilesForPath(filepath))
+
+
+def copy_file_to_destination(filepath: str, destination_filepath: str) -> bool:
+    check = True
+    try:
+        copyfile(filepath, destination_filepath)
+    except IOError:
+        check = False
+
+    return check
+
+
+def copy_file_with_sidecar_files_to_destination(filepath: str, destination_directory: str) -> bool:
+    if not os.path.isfile(filepath):
+        return False
+    
+    filename = Path(filepath).resolve().stem
+    new_filepath = destination_directory + filename + ''.join(Path(filepath).resolve().suffixes)
+
+    check = True
+
+    i = 0
+    while os.path.exists(new_filepath):
+        i += 1
+        new_filepath = destination_directory + filename + f"_{str(i)}" + ''.join(Path(filepath).resolve().suffixes)
+
+    if not copy_file_to_destination(filepath, new_filepath):
+        check = False
+
+    sidecar_files = get_file_sidecar_files(filepath)
+
+    for sidecar_file in sidecar_files:
+        i = 0
+        filename = Path(filepath).resolve().stem
+        new_filepath = destination_directory + filename + ''.join(Path(filepath).resolve().suffixes)
+        while os.path.exists(new_filepath):
+            i += 1
+            new_filepath = destination_directory + filename + f"_{str(i)}" + ''.join(Path(filepath).resolve().suffixes)
+
+        if not copy_file_to_destination(sidecar_file, new_filepath):
+            check = False
+
+    return check
