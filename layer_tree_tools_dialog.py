@@ -290,9 +290,13 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         reverse = self.get_alphabetical_reverse()
+        sort_type = self._get_name_sort_type()
 
         for group in reversed(groups):
-            tools.move_nodes_to_group(group, sorter.get_alphabetical_node_order_within_group(group, reverse))
+            if sort_type == "alphabetical":
+                tools.move_nodes_to_group(group, sorter.get_alphabetical_node_order_within_group(group, reverse))
+            if sort_type == "natural":
+                tools.move_nodes_to_group(group, sorter.get_natural_order_within_group(group, reverse))
 
     def sort_by_file_type(self):
         groups = self.get_groups_to_sort()
@@ -549,6 +553,12 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         self.lineEditGroupContainingSubstring.setDisabled(True)
+
+    def _get_name_sort_type(self) -> str:
+        if self.radioButtonClassicSorting.isChecked():
+            return "alphabetical"
+        if self.radioButtonNaturalSorting.isChecked():
+            return "natural"
 
     def get_group_containing_substring(self) -> bool:
         return self.checkBoxGroupContainingSubstring.isChecked()

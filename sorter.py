@@ -2,12 +2,25 @@ from qgis.core import QgsLayerTreeGroup, QgsLayerTreeLayer, QgsRasterLayer, QgsL
 from . import definitions
 from . import tools
 from typing import List
+import re
 
 
 def get_alphabetical_node_order_within_group(group: QgsLayerTreeGroup, reverse: bool = False) -> List[QgsLayerTreeNode]:
     if not isinstance(group, QgsLayerTreeGroup):
         raise ValueError(f"group: {group} not QgsLayerTreeGroup instance.")
     return sorted(group.children(), key=lambda x: x.name(), reverse=reverse)
+
+
+def get_natural_order_within_group(group: QgsLayerTreeGroup, reverse: bool = False) -> List[QgsLayerTreeNode]:
+    if not isinstance(group, QgsLayerTreeGroup):
+        raise ValueError(f"group: {group} not QgsLayerTreeGroup instance.")
+
+    re_order = re.compile(r'(\d+)')
+
+    group_children = list(group.children())
+    group_children.sort(key=lambda x: [int(y) if y.isdigit() else y for y in re.split(re_order, x.name())],
+                        reverse=reverse)
+    return group_children
 
 
 def get_geometry_node_order_within_group(group: QgsLayerTreeGroup, geometry_order: List[str]) -> List[QgsLayerTreeNode]:

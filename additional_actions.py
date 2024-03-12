@@ -87,6 +87,37 @@ def export_selected_layers_to_dir(destination_directory: str):
         run_file_exporter(filepaths, destination_directory)
 
 
+def build_tree_dict(current, root=None):
+    if root is None:
+        return
+
+    for node in root.children():
+        key = node.name()
+
+
+def export_layers_in_order_making_a_dir_tree(group: QgsLayerTreeGroup, destination_directory: str):
+    if not tools.is_node_a_group(group):
+        return
+
+    tree_dict = {}
+    groups = [group]
+    for group in groups:
+        tree_dict
+    for node in group.children():
+        if tools.is_node_a_group(node):
+            export_layers_in_order_making_a_dir_tree(node, destination_directory)
+            continue
+
+        layer = node.layer()
+        filepath = layer.dataProvider().dataSourceUri()
+        destination = os.path.join(destination_directory, os.path.dirname(filepath))
+
+        if not os.path.isdir(destination):
+            os.makedirs(destination)
+
+        tools.copy_file_with_sidecar_files_to_destination(filepath, destination)
+
+
 class FileExporter(QgsTask):
     def __init__(self, filepaths: List[str], destination_directory: str):
         super().__init__("Exporting layers to new directory")
@@ -97,7 +128,7 @@ class FileExporter(QgsTask):
     def run(self):
         check = True
 
-        self.setProgress(0.01)
+        self.setProgress(0)
         total = len(self.filepaths)
 
         for i, filepath in enumerate(self.filepaths):
