@@ -31,6 +31,8 @@ from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.utils import iface
 from shutil import copyfile
 
+import re
+
 
 def get_layers() -> Dict[str, QgsMapLayer]:
     return QgsProject.instance().mapLayers()
@@ -546,3 +548,12 @@ def copy_file_with_sidecar_files_to_destination(filepath: str, destination_direc
             check = False
 
     return check
+
+
+def sanitize_filename(name: str) -> str:
+    # regex leaves only letters and numbers in the string
+    return re.sub(r'[^a-zA-Z0-9 -_]', '', name)
+
+
+def get_nested_dictionary_total_value_count(dictionary: Dict) -> int:
+    return sum([get_nested_dictionary_total_value_count(v) if isinstance(v, dict) else 1 for v in dictionary.values()])

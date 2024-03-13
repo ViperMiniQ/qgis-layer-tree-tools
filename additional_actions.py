@@ -19,7 +19,7 @@ from qgis.core import (
     Qgis
 )
 from . import tools
-from typing import List
+from typing import List, Dict
 
 
 def toggle_all_layers_in_group_feature_count(group: QgsLayerTreeGroup, state: bool = True):
@@ -56,8 +56,8 @@ def truncate_all_layers_in_group(group: QgsLayerTreeGroup):
                 tools.truncate_layer(layer)
 
 
-def run_file_exporter(filepaths: List[str], destination_directory: str):
-    task = FileExporter(filepaths, destination_directory)
+def run_file_exporter(filepaths: Dict, destination_directory: str, all_in_single_directory: bool = True):
+    task = FileExporter(filepaths, destination_directory, all_in_single_directory)
     tools.run_background_processing_task(task)
 
 
@@ -65,23 +65,23 @@ def export_layers_in_group_to_dir(group: QgsLayerTreeGroup, destination_director
     if not tools.is_node_a_group(group):
         return
 
-    filepaths = []
-    for node in group.children():
+    filepaths = {}
+    for i, node in enumerate(group.children()):
         if tools.is_node_a_group(node):
             continue
 
         layer = node.layer()
 
-        filepaths.append(layer.dataProvider().dataSourceUri())
+        filepaths[i] = layer.dataProvider().dataSourceUri()
 
     if filepaths:
         run_file_exporter(filepaths, destination_directory)
 
 
 def export_selected_layers_to_dir(destination_directory: str):
-    filepaths = []
-    for layer in tools.get_selected_layers():
-        filepaths.append(layer.dataProvider().dataSourceUri())
+    filepaths = {}
+    for i, layer in enumerate(tools.get_selected_layers()):
+        filepaths[i] = layer.dataProvider().dataSourceUri()
 
     if filepaths:
         run_file_exporter(filepaths, destination_directory)
@@ -92,60 +92,72 @@ def build_tree_dict(current, root=None):
         return
 
     for node in root.children():
-        key = node.name()
+        if tools.is_node_a_group(node):
+            key = tools.sanitize_filename(node.name())
+
+            i = 0
+            while key in current.keys():
+                key = f"{key}{i}"
+
+            current[key] = {}
+            build_tree_dict(current[key], node)
+            continue
+
+        if tools.is_node_a_layer(node):
+            current[len(current)] = node.layer().dataProvider().dataSourceUri()
 
 
 def export_layers_in_order_making_a_dir_tree(group: QgsLayerTreeGroup, destination_directory: str):
     if not tools.is_node_a_group(group):
         return
 
-    tree_dict = {}
-    groups = [group]
-    for group in groups:
-        tree_dict
-    for node in group.children():
-        if tools.is_node_a_group(node):
-            export_layers_in_order_making_a_dir_tree(node, destination_directory)
-            continue
+    tree = {}
+    build_tree_dict(tree, group)
 
-        layer = node.layer()
-        filepath = layer.dataProvider().dataSourceUri()
-        destination = os.path.join(destination_directory, os.path.dirname(filepath))
-
-        if not os.path.isdir(destination):
-            os.makedirs(destination)
-
-        tools.copy_file_with_sidecar_files_to_destination(filepath, destination)
+    print(tree)
+    run_file_exporter(tree, destination_directory, False)
 
 
 class FileExporter(QgsTask):
-    def __init__(self, filepaths: List[str], destination_directory: str):
+    def __init__(self, filepaths: Dict, destination_directory: str, all_in_single_directory: bool = False):
         super().__init__("Exporting layers to new directory")
         self.filepaths = filepaths
         self.destination_directory = destination_directory
         self.processing_done = False
+        self.total = tools.get_nested_dictionary_total_value_count(self.filepaths)
+        self.exported = 0
+        self.check = True
+        self.all_in_single_directory = all_in_single_directory
 
     def run(self):
-        check = True
-
         self.setProgress(0)
-        total = len(self.filepaths)
 
-        for i, filepath in enumerate(self.filepaths):
-            if self.isCanceled():
-                return False
+        def export_files(current: Dict, current_dir: str):
+            for key, value in current.items():
+                if self.isCanceled():
+                    return False
 
-            if not os.path.isfile(filepath):
-                return
+                if isinstance(value, dict):
+                    new_dir = current_dir
+                    if not self.all_in_single_directory:
+                        new_dir = os.path.join(current_dir, key)
+                        os.makedirs(new_dir, exist_ok=True)
+                    export_files(value, new_dir)
+                    continue
 
-            if not tools.copy_file_with_sidecar_files_to_destination(filepath, self.destination_directory):
-                check = False
+                if not os.path.isfile(value):
+                    continue
 
-            self.setProgress(i / total * 100)
+                if not tools.copy_file_with_sidecar_files_to_destination(value, current_dir + '/'):
+                    self.check = False
 
-        self.finished(check)
+                self.setProgress(self.exported / self.total * 100)
 
-        return check
+        export_files(self.filepaths, self.destination_directory)
+
+        self.finished(self.check)
+
+        return self.check
 
     def finished(self, result):
         if self.processing_done:

@@ -217,7 +217,7 @@ class LayerTreeTools:
         export_layers_to_dir_menu = QMenu()
 
         export_layers_to_dir_all_layers = QAction(
-            self.tr("Export all layers to directory"),
+            self.tr("Copy all layers files to directory"),
             parent=export_layers_to_dir_menu
         )
         export_layers_to_dir_all_layers.triggered.connect(self.export_all_layers_to_dir)
@@ -226,7 +226,7 @@ class LayerTreeTools:
         export_layers_to_dir_menu.addSeparator()
 
         export_layers_to_dir_selected_groups = QAction(
-            self.tr("Export layers in selected group(s) to directory"),
+            self.tr("Copy layers files in selected group(s) to directory"),
             parent=export_layers_to_dir_menu
         )
         export_layers_to_dir_selected_groups.triggered.connect(self.export_layers_in_selected_groups_to_dir)
@@ -235,19 +235,71 @@ class LayerTreeTools:
         export_layers_to_dir_menu.addSeparator()
 
         export_layers_to_dir_selected_layers = QAction(
-            self.tr("Export selected layers to directory"),
+            self.tr("Copy selected layers files to directory"),
             parent=export_layers_to_dir_menu
         )
         export_layers_to_dir_selected_layers.triggered.connect(self.export_selected_layers_to_dir)
         export_layers_to_dir_menu.addAction(export_layers_to_dir_selected_layers)
 
+        export_layers_to_dir_menu.addSeparator()
+
+        copy_layers_in_order_making_a_tree_dict = QAction(
+            self.tr("Copy layers files (including sub-groups) making a directory tree"),
+            parent=export_layers_to_dir_menu
+        )
+
+        copy_layers_in_order_making_a_tree_dict_menu = QMenu()
+        copy_layers_in_order_making_a_tree_dict_starting_from_root = QAction(
+            self.tr("Start from root"),
+            parent=copy_layers_in_order_making_a_tree_dict_menu
+        )
+        copy_layers_in_order_making_a_tree_dict_starting_from_root.triggered.connect(lambda: self.copy_layers_files_making_a_tree_dict_starting_from_selected_group(True))
+        copy_layers_in_order_making_a_tree_dict_menu.addAction(copy_layers_in_order_making_a_tree_dict_starting_from_root)
+        copy_layers_in_order_making_a_tree_dict_menu.addSeparator()
+
+        copy_layers_in_order_making_a_tree_dict_starting_from_selected_group = QAction(
+            self.tr("Start from selected group"),
+            parent=copy_layers_in_order_making_a_tree_dict_menu
+        )
+        copy_layers_in_order_making_a_tree_dict_starting_from_selected_group.triggered.connect(lambda: self.copy_layers_files_making_a_tree_dict_starting_from_selected_group(False))
+        copy_layers_in_order_making_a_tree_dict_menu.addAction(copy_layers_in_order_making_a_tree_dict_starting_from_selected_group)
+        copy_layers_in_order_making_a_tree_dict.setMenu(copy_layers_in_order_making_a_tree_dict_menu)
+
+        export_layers_to_dir_menu.addAction(copy_layers_in_order_making_a_tree_dict)
+
         export_layers_to_dir_action = QAction(
-            self.tr("Export layers to directory"),
+            self.tr("Copy layers files to directory"),
             parent=parent
         )
         export_layers_to_dir_action.setMenu(export_layers_to_dir_menu)
 
         return export_layers_to_dir_action
+
+    def copy_layers_files_making_a_tree_dict_starting_from_selected_group(self, start_from_root: bool = False):
+        selected_groups = []
+
+        if start_from_root:
+            selected_groups = [tools.get_layer_tree()]
+        else:
+            selected_groups = tools.get_selected_groups()
+
+        if not selected_groups:
+            return
+
+        if len(selected_groups) > 1:
+            tools.show_dialog_error_message('Please select only one group')
+            return
+
+        destination_directory = QFileDialog.getExistingDirectory(
+            self.iface.mainWindow(),
+            self.tr("Select starting directory to export layers to"),
+            options=QFileDialog.ShowDirsOnly
+        )
+
+        if not destination_directory:
+            return
+
+        additional_actions.export_layers_in_order_making_a_dir_tree(selected_groups[0], destination_directory)
 
     def _create_feature_count_action(self, parent):
         toggle_feature_count_menu = QMenu()
