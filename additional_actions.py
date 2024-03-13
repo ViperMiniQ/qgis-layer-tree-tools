@@ -114,7 +114,6 @@ def export_layers_in_order_making_a_dir_tree(group: QgsLayerTreeGroup, destinati
     tree = {}
     build_tree_dict(tree, group)
 
-    print(tree)
     run_file_exporter(tree, destination_directory, False)
 
 
