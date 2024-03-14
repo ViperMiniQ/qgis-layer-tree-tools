@@ -1,5 +1,24 @@
 # Change log
 &nbsp;  
+## 1.2
+&nbsp;
+### NEW
+&nbsp;
+- added option to sort layers by name using alphabetical or natural sorting
+- added additional action to copy layers file to new location
+- added option to group layers by regex pattern
+<!-- -->
+&nbsp;  
+### FIXED
+&nbsp;
+- using 'extract all and sort in root' would disregard the final encountered group and layers in it would be lost
+<!-- -->
+&nbsp;  
+### CHANGED
+&nbsp;
+- file size is calculated from QGIS reported sidecar files
+<!-- -->
+&nbsp;
 ## 1.1
 &nbsp;  
 ###  NEW
