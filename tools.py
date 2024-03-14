@@ -270,23 +270,24 @@ def clear_layer_tree():
         delete_node(child)
 
 
+def get_file_sidecar_files(filepath: str) -> List[str]:
+    """returns list of sidecar files"""
+    return list(QgsFileUtils.sidecarFilesForPath(filepath))
+
+
 def get_file_size_on_disk(filepath: str) -> float:
     """returns size in bytes"""
     if not os.path.isfile(filepath):
         return -1
 
-    if filepath.endswith('.shp'):
-        size_on_disk = 0
-        extensions = ['.shp', '.shx', '.dbf', '.sbn', '.sbx', '.fbn', '.fbx', '.ain', '.aih', '.atx', '.ixs', '.mxs',
-                      '.prj', '.xml', '.cpg']
+    sidecar_files = get_file_sidecar_files(filepath)
+    sidecar_files.append(filepath)
 
-        for ext in extensions:
-            if os.path.isfile(filepath[:-4] + ext):
-                size_on_disk += os.path.getsize(filepath[:-4] + ext)
+    size_on_disk = 0
+    for file in sidecar_files:
+        size_on_disk += os.path.getsize(file)
 
-        return size_on_disk
-
-    return os.path.getsize(filepath)
+    return size_on_disk
 
 
 def get_file_last_modified(filepath: str) -> float:
@@ -500,11 +501,6 @@ def commit_changes_to_layer(layer):
     if not layer.isEditable():
         return
     layer.commitChanges()
-
-
-def get_file_sidecar_files(filepath: str) -> List[str]:
-    """returns list of sidecar files"""
-    return list(QgsFileUtils.sidecarFilesForPath(filepath))
 
 
 def copy_file_to_destination(filepath: str, destination_filepath: str) -> bool:
