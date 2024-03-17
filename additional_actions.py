@@ -1,5 +1,4 @@
 import os
-from qgis.utils import iface
 
 from qgis.core import (
     QgsProject,
@@ -19,7 +18,7 @@ from qgis.core import (
     Qgis
 )
 from . import tools
-from typing import List, Dict
+from typing import Dict
 
 
 def toggle_all_layers_in_group_feature_count(group: QgsLayerTreeGroup, state: bool = True):
@@ -56,12 +55,17 @@ def truncate_all_layers_in_group(group: QgsLayerTreeGroup):
                 tools.truncate_layer(layer)
 
 
-def run_file_exporter(filepaths: Dict, destination_directory: str, all_in_single_directory: bool = True):
-    task = FileExporter(filepaths, destination_directory, all_in_single_directory)
+def run_file_copier(
+        filepaths: Dict,
+        destination_directory: str,
+        all_in_single_directory: bool = True,
+        use_layer_name: bool = False
+):
+    task = FileCopier(filepaths, destination_directory, all_in_single_directory, use_layer_name)
     tools.run_background_processing_task(task)
 
 
-def export_layers_in_group_to_dir(group: QgsLayerTreeGroup, destination_directory: str):
+def copy_layer_files_in_group_to_dir(group: QgsLayerTreeGroup, destination_directory: str, use_layer_name: bool = False):
     if not tools.is_node_a_group(group):
         return
 
@@ -72,19 +76,25 @@ def export_layers_in_group_to_dir(group: QgsLayerTreeGroup, destination_director
 
         layer = node.layer()
 
-        filepaths[i] = layer.dataProvider().dataSourceUri()
+        filepaths[i] = {
+            'filepath': layer.dataProvider().dataSourceUri(),
+            'name': node.name()
+        }
 
     if filepaths:
-        run_file_exporter(filepaths, destination_directory)
+        run_file_copier(filepaths, destination_directory, True, use_layer_name)
 
 
-def export_selected_layers_to_dir(destination_directory: str):
+def export_selected_layers_to_dir(destination_directory: str, use_layer_name: bool = False):
     filepaths = {}
     for i, layer in enumerate(tools.get_selected_layers()):
-        filepaths[i] = layer.dataProvider().dataSourceUri()
+        filepaths[i] = {
+            'filepath': layer.dataProvider().dataSourceUri(),
+            'name': layer.name()
+        }
 
     if filepaths:
-        run_file_exporter(filepaths, destination_directory)
+        run_file_copier(filepaths, destination_directory, True, use_layer_name)
 
 
 def build_tree_dict(current, root=None):
@@ -104,22 +114,31 @@ def build_tree_dict(current, root=None):
             continue
 
         if tools.is_node_a_layer(node):
-            current[len(current)] = node.layer().dataProvider().dataSourceUri()
+            current[len(current)] = {
+                'filepath': node.layer().dataProvider().dataSourceUri(),
+                'name': node.name()
+            }
 
 
-def export_layers_in_order_making_a_dir_tree(group: QgsLayerTreeGroup, destination_directory: str):
+def copy_layer_files_making_a_dir_tree(group: QgsLayerTreeGroup, destination_directory: str, use_layer_name: bool = False):
     if not tools.is_node_a_group(group):
         return
 
     tree = {}
     build_tree_dict(tree, group)
 
-    run_file_exporter(tree, destination_directory, False)
+    run_file_copier(tree, destination_directory, False, use_layer_name)
 
 
-class FileExporter(QgsTask):
-    def __init__(self, filepaths: Dict, destination_directory: str, all_in_single_directory: bool = False):
-        super().__init__("Exporting layers to new directory")
+class FileCopier(QgsTask):
+    def __init__(
+        self,
+        filepaths: Dict,
+        destination_directory: str,
+        all_in_single_directory: bool = False,
+        use_layer_name: bool = False
+    ):
+        super().__init__("Copying layer files to new directory")
         self.filepaths = filepaths
         self.destination_directory = destination_directory
         self.processing_done = False
@@ -127,6 +146,7 @@ class FileExporter(QgsTask):
         self.exported = 0
         self.check = True
         self.all_in_single_directory = all_in_single_directory
+        self.use_layer_name = use_layer_name
 
     def run(self):
         self.setProgress(0)
@@ -137,17 +157,24 @@ class FileExporter(QgsTask):
                     return False
 
                 if isinstance(value, dict):
-                    new_dir = current_dir
-                    if not self.all_in_single_directory:
-                        new_dir = os.path.join(current_dir, key)
-                        os.makedirs(new_dir, exist_ok=True)
-                    export_files(value, new_dir)
+                    if not (len(value) == 2 and 'filepath' in value.keys() and 'name' in value.keys()):
+                        new_dir = current_dir
+
+                        if not self.all_in_single_directory:
+                            new_dir = os.path.join(current_dir, key)
+                            os.makedirs(new_dir, exist_ok=True)
+
+                        export_files(value, new_dir)
+                        continue
+
+                if not os.path.isfile(value['filepath']):
                     continue
 
-                if not os.path.isfile(value):
-                    continue
-
-                if not tools.copy_file_with_sidecar_files_to_destination(value, current_dir + '/'):
+                if not tools.copy_file_with_sidecar_files_to_destination(
+                        value['filepath'],
+                        current_dir + '/',
+                        tools.sanitize_filename(value['name']) if self.use_layer_name else ""
+                ):
                     self.check = False
 
                 self.setProgress(self.exported / self.total * 100)
