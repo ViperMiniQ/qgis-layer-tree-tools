@@ -45,6 +45,8 @@ from . import tools
 
 from . import help_render
 
+from PyQt5.QtCore import QT_VERSION_STR, PYQT_VERSION_STR
+
 
 class LayerTreeTools:
     """QGIS Plugin Implementation."""
@@ -624,37 +626,42 @@ class LayerTreeTools:
             self.tr('Additional actions'),
             self.iface.mainWindow()
         )
-        self.action_plugin_toolbar_additional_actions.setMenu(self._get_additional_actions_menu())
-        self.action_help = QAction(
-            self.tr('Help'),
-            self.iface.mainWindow()
-        )
-
-        self.action_change_log = QAction(
-            self.tr('Change log'),
-            self.iface.mainWindow()
-        )
 
         self.action_sorter.triggered.connect(self.run)
         self.action_snapshooter.triggered.connect(self.run_snapshooter)
-        self.action_help.triggered.connect(self.show_help)
-        self.action_change_log.triggered.connect(self.show_changelog)
 
         menu = self.toolbutton.menu()
 
         menu.addAction(self.action_sorter)
         menu.addAction(self.action_snapshooter)
         menu.addAction(self.action_plugin_toolbar_additional_actions)
-        menu.addAction(self.action_help)
-        menu.addAction(self.action_change_log)
+
 
         self.toolbutton.setDefaultAction(self.action_sorter)
 
         self.actions.append(self.action_sorter)
         self.actions.append(self.action_snapshooter)
         self.actions.append(self.action_plugin_toolbar_additional_actions)
-        self.actions.append(self.action_help)
-        self.actions.append(self.action_change_log)
+
+        if help_render.is_runnable():
+            self.action_plugin_toolbar_additional_actions.setMenu(self._get_additional_actions_menu())
+            self.action_help = QAction(
+                self.tr('Help'),
+                self.iface.mainWindow()
+            )
+
+            self.action_change_log = QAction(
+                self.tr('Change log'),
+                self.iface.mainWindow()
+            )
+            self.action_help.triggered.connect(self.show_help)
+            self.action_change_log.triggered.connect(self.show_changelog)
+
+            menu.addAction(self.action_help)
+            menu.addAction(self.action_change_log)
+
+            self.actions.append(self.action_help)
+            self.actions.append(self.action_change_log)
 
         # /plugins toolbar
 

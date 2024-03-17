@@ -56,3 +56,11 @@ class HelpDialog(MDRender):
 class ChangeLogDialog(MDRender):
     def __init__(self, parent=None):
         super().__init__(CHANGELOG_FILEPATH, "Layer Tree Tools: Change log", parent)
+
+
+def is_runnable():
+    try:
+        HelpDialog()
+    except AttributeError:
+        return False
+    return True
