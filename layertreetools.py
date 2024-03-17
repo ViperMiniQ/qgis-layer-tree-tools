@@ -296,10 +296,20 @@ class LayerTreeTools:
             options=QFileDialog.ShowDirsOnly
         )
 
-        if not destination_directory:
+        if not destination_directory or destination_directory == '/':
             return
 
-        additional_actions.export_layers_in_order_making_a_dir_tree(selected_groups[0], destination_directory)
+        res = tools.ask_question(
+            'Use layer name as file name?',
+            'Do you want to use layer name or original file name for copied files?',
+            'Use layer name',
+            'Use original file name'
+        )
+
+        if res is None:
+            return
+
+        additional_actions.copy_layer_files_making_a_dir_tree(selected_groups[0], destination_directory, res)
 
     def _create_feature_count_action(self, parent):
         toggle_feature_count_menu = QMenu()
@@ -466,8 +476,18 @@ class LayerTreeTools:
             options=QFileDialog.ShowDirsOnly
         )
 
+        res = tools.ask_question(
+            'Use layer name as file name?',
+            'Do you want to use layer name or original file name for copied files?',
+            'Use layer name',
+            'Use original file name'
+        )
+
+        if res is None:
+            return
+
         for group in groups:
-            additional_actions.export_layers_in_group_to_dir(group, destination_directory + '/')
+            additional_actions.copy_layer_files_in_group_to_dir(group, destination_directory + '/', res)
 
     def export_selected_layers_to_dir(self):
         destination_directory = QFileDialog.getExistingDirectory(
@@ -476,10 +496,20 @@ class LayerTreeTools:
             options=QFileDialog.ShowDirsOnly
         )
 
-        if not destination_directory:
+        if not destination_directory or destination_directory == '/':
             return
 
-        additional_actions.export_selected_layers_to_dir(destination_directory + '/')
+        res = tools.ask_question(
+            'Use layer name as file name?',
+            'Do you want to use layer name or original file name for copied files?',
+            'Use layer name',
+            'Use original file name'
+        )
+
+        if res is None:
+            return
+
+        additional_actions.export_selected_layers_to_dir(destination_directory + '/', res)
 
     def export_all_layers_to_dir(self):
         destination_directory = QFileDialog.getExistingDirectory(
@@ -488,11 +518,21 @@ class LayerTreeTools:
             options=QFileDialog.ShowDirsOnly
         )
 
-        if not destination_directory:
+        if not destination_directory or destination_directory == '/':
+            return
+
+        res = tools.ask_question(
+            'Use layer name as file name?',
+            'Do you want to use layer name or original file name for copied files?',
+            'Use layer name',
+            'Use original file name'
+        )
+
+        if res is None:
             return
 
         for group in tools.get_all_groups():
-            additional_actions.export_layers_in_group_to_dir(group, destination_directory + '/')
+            additional_actions.copy_layer_files_in_group_to_dir(group, destination_directory + '/', res)
 
     def commit_changes_to_selected_layers(self):
         for layer in tools.get_selected_layers():
@@ -590,9 +630,15 @@ class LayerTreeTools:
             self.iface.mainWindow()
         )
 
+        self.action_change_log = QAction(
+            self.tr('Change log'),
+            self.iface.mainWindow()
+        )
+
         self.action_sorter.triggered.connect(self.run)
         self.action_snapshooter.triggered.connect(self.run_snapshooter)
         self.action_help.triggered.connect(self.show_help)
+        self.action_change_log.triggered.connect(self.show_changelog)
 
         menu = self.toolbutton.menu()
 
@@ -600,6 +646,7 @@ class LayerTreeTools:
         menu.addAction(self.action_snapshooter)
         menu.addAction(self.action_plugin_toolbar_additional_actions)
         menu.addAction(self.action_help)
+        menu.addAction(self.action_change_log)
 
         self.toolbutton.setDefaultAction(self.action_sorter)
 
@@ -607,10 +654,15 @@ class LayerTreeTools:
         self.actions.append(self.action_snapshooter)
         self.actions.append(self.action_plugin_toolbar_additional_actions)
         self.actions.append(self.action_help)
+        self.actions.append(self.action_change_log)
 
         # /plugins toolbar
 
         self.first_start = True
+
+    def show_changelog(self):
+        self.w = help_render.ChangeLogDialog()
+        self.w.show()
 
     def show_help(self):
         self.w = help_render.HelpDialog()

@@ -55,4 +55,4 @@ class HelpDialog(MDRender):
 
 class ChangeLogDialog(MDRender):
     def __init__(self, parent=None):
-        super().__init__(CHANGELOG_FILEPATH, "Layer Tree Tools: Change Log", parent)
+        super().__init__(CHANGELOG_FILEPATH, "Layer Tree Tools: Change log", parent)

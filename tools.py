@@ -513,32 +513,31 @@ def copy_file_to_destination(filepath: str, destination_filepath: str) -> bool:
     return check
 
 
-def copy_file_with_sidecar_files_to_destination(filepath: str, destination_directory: str) -> bool:
+def copy_file_with_sidecar_files_to_destination(filepath: str, destination_directory: str, name: str = "") -> bool:
     if not os.path.isfile(filepath):
         return False
-    
-    filename = Path(filepath).resolve().stem
-    new_filepath = destination_directory + filename + ''.join(Path(filepath).resolve().suffixes)
 
     check = True
 
-    i = 0
-    while os.path.exists(new_filepath):
-        i += 1
-        new_filepath = destination_directory + filename + f"_{str(i)}" + ''.join(Path(filepath).resolve().suffixes)
-
-    if not copy_file_to_destination(filepath, new_filepath):
-        check = False
-
     sidecar_files = get_file_sidecar_files(filepath)
+    sidecar_files.append(filepath)
 
     for sidecar_file in sidecar_files:
         i = 0
         filename = Path(filepath).resolve().stem
-        new_filepath = destination_directory + filename + ''.join(Path(filepath).resolve().suffixes)
+
+        if name:
+            new_filepath = destination_directory + name + ''.join(Path(sidecar_file).resolve().suffixes)
+        else:
+            new_filepath = destination_directory + filename + ''.join(Path(sidecar_file).resolve().suffixes)
+
         while os.path.exists(new_filepath):
             i += 1
-            new_filepath = destination_directory + filename + f"_{str(i)}" + ''.join(Path(filepath).resolve().suffixes)
+
+            if name:
+                new_filepath = destination_directory + name + f"_{str(i)}" + ''.join(Path(sidecar_file).resolve().suffixes)
+            else:
+                new_filepath = destination_directory + filename + f"_{str(i)}" + ''.join(Path(sidecar_file).resolve().suffixes)
 
         if not copy_file_to_destination(sidecar_file, new_filepath):
             check = False
@@ -553,3 +552,26 @@ def sanitize_filename(name: str) -> str:
 
 def get_nested_dictionary_total_value_count(dictionary: Dict) -> int:
     return sum([get_nested_dictionary_total_value_count(v) if isinstance(v, dict) else 1 for v in dictionary.values()])
+
+
+def ask_question(title: str, text: str, left_button_text: str, right_button_text: str) -> bool:
+    """
+    returns True if left button was pressed, False if right button was pressed, None if dialog was closed
+    """
+    box = QMessageBox()
+    box.setIcon(QMessageBox.Question)
+    box.setWindowTitle(title)
+    box.setText(text)
+    box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    buttonY = box.button(QMessageBox.Yes)
+    buttonY.setText(left_button_text)
+    buttonN = box.button(QMessageBox.No)
+    buttonN.setText(right_button_text)
+    box.exec_()
+
+    if box.clickedButton() == buttonY:
+        return True
+    if box.clickedButton() == buttonN:
+        return False
+
+    return None
