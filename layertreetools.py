@@ -626,6 +626,7 @@ class LayerTreeTools:
             self.tr('Additional actions'),
             self.iface.mainWindow()
         )
+        self.action_plugin_toolbar_additional_actions.setMenu(self._get_additional_actions_menu())
 
         self.action_sorter.triggered.connect(self.run)
         self.action_snapshooter.triggered.connect(self.run_snapshooter)
@@ -636,7 +637,6 @@ class LayerTreeTools:
         menu.addAction(self.action_snapshooter)
         menu.addAction(self.action_plugin_toolbar_additional_actions)
 
-
         self.toolbutton.setDefaultAction(self.action_sorter)
 
         self.actions.append(self.action_sorter)
@@ -644,7 +644,7 @@ class LayerTreeTools:
         self.actions.append(self.action_plugin_toolbar_additional_actions)
 
         if help_render.is_runnable():
-            self.action_plugin_toolbar_additional_actions.setMenu(self._get_additional_actions_menu())
+
             self.action_help = QAction(
                 self.tr('Help'),
                 self.iface.mainWindow()
