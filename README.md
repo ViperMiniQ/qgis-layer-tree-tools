@@ -1,5 +1,5 @@
 # Layer Tree Tools (sort, group, snapshot)
-&nbsp;
+&nbsp;  
 ## SORTING
 &nbsp;
 Options:  
@@ -644,10 +644,22 @@ As of ver 1.1, snapshots include symbology and visibility information.
 Alongside shortcuts for Sorting and grouping and Snapshost, additional actions allow fast access to some common functions:
 &nbsp;  
 * Actions:
-  + Toggle feature count  
+  + Toggle feature count
+    - shows layers feature count
   + Reload layers  
+    - reloads layer data and refresh the map renderer
   + Truncate (delete features in layers)
+    - all layer features are deleted, leaving a blank layer
   + Commit changes
+    - if layer was open for editing, all changes are saved
+  + Copy layers files to directory
+    - copies all layers files to selected directory (sidecar files as reported by QGIS are also included)
+    - additionally, entire tree can be copied to a directory (for each group, a new directory is created)
+    - if multiple files share the same name, a number is appended to the end of the file name (e.g. file_1, file_2, file_3, ...)
+    - if multiple groups share the same name, a number is appended to the end of the group name (e.g. group_1, group_2, group_3, ...)
+    - memory layers are ignored
+    - copies can have original file names, or they can be renamed to the layer name
+    - only characters allowed in file names when applying layer name are: [space, a-z, A-Z, 0-9, _] - if a layer name contains a character not allowed in file name, it is replaced with an underscore
 <!-- -->
 &nbsp;  
 Each of the actions can be done on:

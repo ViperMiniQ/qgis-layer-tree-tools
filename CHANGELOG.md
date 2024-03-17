@@ -1,11 +1,12 @@
 # Change log
-&nbsp;  
+&nbsp;
 ## 1.2
 &nbsp;
 ### NEW
 &nbsp;
 - added option to sort layers by name using alphabetical or natural sorting
-- added additional action to copy layers file to new location
+- added additional action to copy layers files to new directory
+- additional actions menu also available from the plugin button in plugins toolbar
 - added option to group layers by regex pattern
 <!-- -->
 &nbsp;  
