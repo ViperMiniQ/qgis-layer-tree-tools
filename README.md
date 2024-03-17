@@ -395,7 +395,7 @@ Options:
   * descending  
 <!-- -->
 &nbsp;  
-*All ESRI Shapefile extensions are included in the sum when determining shapefile size.    
+If sidecar files are reported by QGIS, they are also included in sum.  
 &nbsp;
 #### SIZE ON DISK EXAMPLE
 &nbsp;  
@@ -517,7 +517,13 @@ Options:
   * root only  
   * group within all groups  
   * within selected group(s)  
-  * extract all and group in root  
+  * extract all and group in root
+<!-- -->
+&nbsp;  
+Additional option:
+  * group singles
+    - if the option is selected, layers that don't share the same attribute are grouped in a separate group
+    - default is unselected, lone layers are left ungrouped
 <!-- -->
 &nbsp;  
 ### NAME
@@ -527,9 +533,9 @@ Names must match exactly.
 &nbsp;  
 Options:  
    
-  * Nodes containing same substring can be grouped together.  
-  
-  * Groups (group names) can be ignored when grouping by name.  
+  * Nodes containing same substring can be grouped together
+  * Groups (group names) can be ignored when grouping by name  
+  * Nodes can be grouped by matching regular expression
 <!-- -->
 &nbsp;  
 ### GEOMETRY
@@ -588,7 +594,7 @@ If the step is set to 0, size on disk must match completely in order to be group
 Memory layers don't have size on disk property.    
 &nbsp;  
   
-*All ESRI Shapefile extensions are taken into account when getting size on disk of shapefile.  
+If sidecar files are reported by QGIS, they are also included in sum.
 &nbsp;  
 ### FILETYPE
 &nbsp;  

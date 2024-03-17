@@ -7,7 +7,7 @@
 - added option to sort layers by name using alphabetical or natural sorting
 - added additional action to copy layers files to new directory
 - additional actions menu also available from the plugin button in plugins toolbar
-- added option to group layers by regex pattern
+- added option to group nodes by regex pattern (node name)
 <!-- -->
 &nbsp;  
 ### FIXED
