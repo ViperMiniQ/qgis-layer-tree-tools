@@ -145,7 +145,6 @@ class FileCopier(QgsTask):
         super().__init__("Copying layer files to new directory")
         self.filepaths = filepaths
         self.destination_directory = destination_directory
-        self.processing_done = False
         self.total = tools.get_nested_dictionary_total_value_count(self.filepaths)
         self.exported = 0
         self.check = True
@@ -185,12 +184,7 @@ class FileCopier(QgsTask):
 
         export_files(self.filepaths, self.destination_directory)
 
-        self.finished(self.check)
-
         return self.check
 
     def finished(self, result):
-        if self.processing_done:
-            return
-
-        self.processing_done = True
+        pass
