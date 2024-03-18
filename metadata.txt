@@ -7,7 +7,7 @@
 name=Layer Tree Tools
 qgisMinimumVersion=3.0
 description=Sorts and groups nodes in layer tree, takes layer tree snapshots
-version=1.2
+version=1.2.1
 author=Viper MiniQ
 email=viperminiq@gmail.com
 

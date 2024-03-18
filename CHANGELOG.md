@@ -1,6 +1,6 @@
 # Change log
 &nbsp;
-## 1.2
+## 1.2.1
 &nbsp;
 ### NEW
 &nbsp;
@@ -13,6 +13,7 @@
 ### FIXED
 &nbsp;
 - using 'extract all and sort in root' would disregard the final encountered group and layers in it would be lost
+- background processing not working on some systems (getting garbage collected before execution)
 <!-- -->
 &nbsp;  
 ### CHANGED
