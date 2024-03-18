@@ -21,6 +21,9 @@ from . import tools
 from typing import Dict
 
 
+file_copier_task = None
+
+
 def toggle_all_layers_in_group_feature_count(group: QgsLayerTreeGroup, state: bool = True):
     for node in group.children():
         if tools.is_node_a_layer(node):
@@ -61,8 +64,9 @@ def run_file_copier(
         all_in_single_directory: bool = True,
         use_layer_name: bool = False
 ):
-    task = FileCopier(filepaths, destination_directory, all_in_single_directory, use_layer_name)
-    tools.run_background_processing_task(task)
+    global file_copier_task
+    file_copier_task = FileCopier(filepaths, destination_directory, all_in_single_directory, use_layer_name)
+    tools.run_background_processing_task(file_copier_task)
 
 
 def copy_layer_files_in_group_to_dir(group: QgsLayerTreeGroup, destination_directory: str, use_layer_name: bool = False):

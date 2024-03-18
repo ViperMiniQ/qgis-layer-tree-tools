@@ -34,6 +34,9 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'snapshooter_dialog_base.ui'))
 
 
+snapshooter_task = None
+
+
 class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
     TREEVIEW_ITEMS = {
         'ID': 0,
@@ -158,10 +161,18 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                 return
             starting_point = starting_point[0]
 
+        global snapshooter_task
+        snapshooter_task = snapshooter.Snapshooter(
+            name,
+            include_rasters,
+            include_vector_layers,
+            vector_layers_in_memory,
+            starting_point,
+            self._insert_new_snapshot
+        )
+
         tools.run_background_processing_task(
-            snapshooter.Snapshooter(name, include_rasters, include_vector_layers,
-                                    vector_layers_in_memory, starting_point, self._insert_new_snapshot
-                                    )
+            snapshooter_task
         )
 
     def _insert_new_snapshot(self, snapshot: Dict):
