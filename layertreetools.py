@@ -447,6 +447,33 @@ class LayerTreeTools:
 
         return reload_layers
 
+    def expand_doubleclicked_group(self):
+        selected_groups = tools.get_selected_groups()
+
+        if not selected_groups:
+            return
+
+        group = selected_groups[0]
+
+        if group.isExpanded():
+            group.setExpanded(False)
+            return
+
+        group.setExpanded(True)
+
+    def _expand_selected_group(self, state: bool):
+        self.iface.layerTreeView().doubleClicked.connect(self.expand_doubleclicked_group)
+
+    def _create_expanding_groups_with_doubleclick_action(self, parent):
+        expand_groups_with_doubleclick_action = QAction(
+            self.tr("Expand groups with double click"),
+            parent=parent,
+            checkable=True
+        )
+        expand_groups_with_doubleclick_action.triggered.connect(self._expand_selected_group)
+
+        return expand_groups_with_doubleclick_action
+
     def _get_additional_actions_menu(self):
         additional_actions_menu = QMenu()
 
@@ -463,6 +490,10 @@ class LayerTreeTools:
         additional_actions_menu.addSeparator()
 
         additional_actions_menu.addAction(self._export_layers_to_dir_action(additional_actions_menu))
+
+        additional_actions_menu.addSeparator()
+
+        additional_actions_menu.addAction(self._create_expanding_groups_with_doubleclick_action(additional_actions_menu))
 
         return additional_actions_menu
 
