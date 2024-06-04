@@ -524,20 +524,21 @@ def copy_file_with_sidecar_files_to_destination(filepath: str, destination_direc
 
     for sidecar_file in sidecar_files:
         i = 0
-        filename = Path(filepath).resolve().stem
+        filename = Path(sidecar_file).resolve().stem
+        suffix = Path(sidecar_file).resolve().suffixes[-1] if Path(sidecar_file).resolve().suffixes else ""
 
         if name:
-            new_filepath = destination_directory + name + ''.join(Path(sidecar_file).resolve().suffixes)
+            new_filepath = destination_directory + name + suffix
         else:
-            new_filepath = destination_directory + filename + ''.join(Path(sidecar_file).resolve().suffixes)
+            new_filepath = destination_directory + filename + suffix
 
         while os.path.exists(new_filepath):
             i += 1
 
             if name:
-                new_filepath = destination_directory + name + f"_{str(i)}" + ''.join(Path(sidecar_file).resolve().suffixes)
+                new_filepath = destination_directory + name + f"_{str(i)}" + suffix
             else:
-                new_filepath = destination_directory + filename + f"_{str(i)}" + ''.join(Path(sidecar_file).resolve().suffixes)
+                new_filepath = destination_directory + filename + f"_{str(i)}" + suffix
 
         if not copy_file_to_destination(sidecar_file, new_filepath):
             check = False

@@ -1,5 +1,16 @@
 # Change log
 &nbsp;
+## 1.3.0
+&nbsp;
+### NEW
+- additional action to expand/collapse groups
+<!-- -->
+&nbsp;
+### FIXED
+&nbsp;
+- when copying layer files, if a file contained multiple dots in its name, the extension(s) would be doubled
+<!-- -->
+&nbsp;
 ## 1.2.1
 &nbsp;
 ### NEW
