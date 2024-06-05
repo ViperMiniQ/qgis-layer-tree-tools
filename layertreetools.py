@@ -45,15 +45,6 @@ from . import tools
 
 from . import help_render
 
-SETTINGS_FILEPATH = os.path.join(os.path.dirname(__file__), 'settings.json')
-DEFAULT_SETTINGS = {
-    'snapshots_directory': os.path.join(os.path.dirname(__file__), 'Snapshots/'),
-}
-
-if not os.path.exists(SETTINGS_FILEPATH):
-    with open(SETTINGS_FILEPATH, 'w') as f:
-        print(DEFAULT_SETTINGS, file=f)
-
 
 class LayerTreeTools:
     """QGIS Plugin Implementation."""

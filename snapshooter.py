@@ -1,7 +1,6 @@
 import datetime
 from typing import List, Dict
 import uuid
-from pathlib import Path
 import pickle
 
 from . import tools
@@ -23,10 +22,6 @@ from qgis.core import (
 )
 
 
-SNAPSHOT_DIR = os.path.join(os.path.dirname(__file__), 'Snapshots/')
-Path(SNAPSHOT_DIR).mkdir(parents=True, exist_ok=True)
-
-
 # class Snapshot(TypedDict):
 #     at_time: datetime.datetime
 #     name: str
@@ -39,6 +34,7 @@ Path(SNAPSHOT_DIR).mkdir(parents=True, exist_ok=True)
 
 class Snapshooter(QgsTask):
     LAYER_DETAILS_KEYS = ['filepath', 'name', 'provider', 'type', 'features', 'attributes']
+    SNAPSHOT_DIR = os.path.join(os.path.dirname(__file__), 'Snapshots/')
 
     def __init__(self, name: str, include_rasters: bool, include_vector_layers: bool, vector_layers_in_memory: bool,
                  starting_point: QgsLayerTreeGroup = None, callback_func=None):
@@ -103,7 +99,7 @@ class Snapshooter(QgsTask):
             'vector_layers_in_memory': self.vector_layers_in_memory,
             'id': snapshot_id
         }
-        filepath = SNAPSHOT_DIR + re.sub('[^a-zA-Z0-9]+', '', snapshot_id) + '.snp'
+        filepath = Snapshooter.SNAPSHOT_DIR + re.sub('[^a-zA-Z0-9]+', '', snapshot_id) + '.snp'
 
         with open(filepath, 'wb') as file:
             pickle.dump(snapshot_details, file, protocol=4)
@@ -118,9 +114,9 @@ class Snapshooter(QgsTask):
     @classmethod
     def get_all_snapshots_details(cls):
         snapshot_details = []
-        for file in os.listdir(SNAPSHOT_DIR):
+        for file in os.listdir(Snapshooter.SNAPSHOT_DIR):
             if file.endswith('.snp'):
-                filepath = os.path.join(SNAPSHOT_DIR, file)
+                filepath = os.path.join(Snapshooter.SNAPSHOT_DIR, file)
                 try:
                     with open(filepath, 'rb') as f:
                         snapshot_details.append(pickle.load(f))
@@ -132,9 +128,9 @@ class Snapshooter(QgsTask):
     def delete_snapshot(cls, id_: int) -> bool:
         delete_filepath = None
 
-        for file in os.listdir(SNAPSHOT_DIR):
+        for file in os.listdir(Snapshooter.SNAPSHOT_DIR):
             if file.endswith('.snp'):
-                filepath = os.path.join(SNAPSHOT_DIR, file)
+                filepath = os.path.join(Snapshooter.SNAPSHOT_DIR, file)
                 try:
                     with open(filepath, 'rb') as f:
                         details = pickle.load(f)
@@ -160,9 +156,9 @@ class Snapshooter(QgsTask):
         details = None
         symbology = None
 
-        for file in os.listdir(SNAPSHOT_DIR):
+        for file in os.listdir(Snapshooter.SNAPSHOT_DIR):
             if file.endswith('.snp'):
-                filepath = os.path.join(SNAPSHOT_DIR, file)
+                filepath = os.path.join(Snapshooter.SNAPSHOT_DIR, file)
                 try:
                     with open(filepath, 'rb') as f:
                         details = pickle.load(f)

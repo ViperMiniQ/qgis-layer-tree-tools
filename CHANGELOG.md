@@ -3,14 +3,16 @@
 ## 1.3.0
 &nbsp;
 ### NEW
-- sort and group now possible based on CRS
+- sorting and grouping now possible based on CRS
 - additional action to expand/collapse groups on double click
+- snapshots directory can now be set (defaults to /Snapshots inside plugin directory)
 <!-- -->
 &nbsp;
 ### FIXED
 &nbsp;
 - when copying layer files, if a file contained multiple dots in its name, the extension(s) would be doubled
 - sort and group dialog won't be rebuilt every time it is opened
+- snapshot loading misreporting layers failed to load when copying vector layers to memory
 <!-- -->
 &nbsp;
 ## 1.2.1
@@ -59,6 +61,6 @@
 ### FIXED
 &nbsp;
 - when using 'in selected group(s)' option, an error could arose if both a group and its sub-group were selected
-    + group order is checked before performing any operations, so it safe to use the function in any combination
+    + group order is checked before performing any operations, so it is safe to use the function in any combination
 - snapshot creation failing on some Linux distributions due to 'finished' signal never being called to dump file to disk
 - replace tree with the snapshot now works

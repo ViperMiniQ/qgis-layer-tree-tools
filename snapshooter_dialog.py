@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+from pathlib import Path
+import json
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
@@ -34,6 +36,39 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'snapshooter_dialog_base.ui'))
 
 
+SNAPSHOT_DIR = os.path.join(os.path.dirname(__file__), 'Snapshots/')
+Path(SNAPSHOT_DIR).mkdir(parents=True, exist_ok=True)
+
+
+SETTINGS_FILEPATH = os.path.join(os.path.dirname(__file__), 'settings.json')
+DEFAULT_SETTINGS = {
+    "snapshots_directory": Path(os.path.join(os.path.dirname(__file__), 'Snapshots')).as_posix() + '/',
+}
+CURRENT_SETTINGS = None
+
+if not os.path.exists(SETTINGS_FILEPATH):
+    CURRENT_SETTINGS = DEFAULT_SETTINGS
+    with open(SETTINGS_FILEPATH, 'w') as f:
+        json.dump(CURRENT_SETTINGS, f)
+
+
+def load_settings():
+    global CURRENT_SETTINGS
+    with open(SETTINGS_FILEPATH, 'r') as f:
+        CURRENT_SETTINGS = json.load(f)
+        if not CURRENT_SETTINGS['snapshots_directory'].endswith('/'):
+            CURRENT_SETTINGS['snapshots_directory'] += '/'
+
+        snapshooter.Snapshooter.SNAPSHOT_DIR = CURRENT_SETTINGS['snapshots_directory']
+
+def write_settings():
+    with open(SETTINGS_FILEPATH, 'w') as f:
+        json.dump(CURRENT_SETTINGS, f)
+
+
+load_settings()
+
+
 snapshooter_task = None
 
 
@@ -63,6 +98,8 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
         self.treeViewSnapshots.setModel(self.treeview_model)
         self.treeViewSnapshots.hideColumn(self.TREEVIEW_ITEMS['ID'])
 
+        self.pushButtonBrowseSnapshotDirectory.clicked.connect(self.browse_snapshot_directory)
+
         self.pushButtonCreateSnapshot.clicked.connect(self.create_snapshot)
         self.pushButtonLoadSelectedSnapshot.clicked.connect(self._load_selected_snapshot)
         self.pushButtonRefreshSnapshotsDetails.clicked.connect(self._reload_all_snapshots_details)
@@ -73,7 +110,28 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.state_changed_include_vector_layers()
 
+        self.refresh_snapshot_directory()
+
+    def refresh_snapshot_directory(self):
+        self.lineEditSnapshotDirectory.setText(CURRENT_SETTINGS['snapshots_directory'])
         self._reload_all_snapshots_details()
+
+    def browse_snapshot_directory(self):
+        directory = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select directory for snapshots', CURRENT_SETTINGS['snapshots_directory'])
+
+        if not directory or not os.path.isdir(directory):
+            return
+
+        directory = Path(directory).as_posix() + '/'
+
+        self.lineEditSnapshotDirectory.setText(directory)
+
+        CURRENT_SETTINGS['snapshots_directory'] = directory
+
+        write_settings()
+        load_settings()
+
+        self.refresh_snapshot_directory()
 
     def _get_selected_treeview_row_data(self) -> Dict:
         selected_indexes = self.treeViewSnapshots.selectedIndexes()
@@ -226,9 +284,6 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                         {'Name': value['name'], 'Provider': value['provider'], 'Datasource': value['filepath']})
                     continue
 
-                if not value['filepath'].startswith('memory') and not os.path.isfile(value['filepath']):
-                    report.append(
-                        {'Name': value['name'], 'Provider': value['provider'], 'Datasource': value['filepath']})
                 if value['attributes']:
                     attrs = [tools.convert_dict_to_qgis_field(attr) for attr in value['attributes']]
                     tools.set_layer_attributes(layer, attrs)
