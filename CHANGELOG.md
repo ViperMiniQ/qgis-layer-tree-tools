@@ -3,12 +3,14 @@
 ## 1.3.0
 &nbsp;
 ### NEW
-- additional action to expand/collapse groups
+- sort and group now possible based on CRS
+- additional action to expand/collapse groups on double click
 <!-- -->
 &nbsp;
 ### FIXED
 &nbsp;
 - when copying layer files, if a file contained multiple dots in its name, the extension(s) would be doubled
+- sort and group dialog won't be rebuilt every time it is opened
 <!-- -->
 &nbsp;
 ## 1.2.1

@@ -21,7 +21,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-import time
+import os
 
 from PyQt5.QtWidgets import QMenu, QAction
 # import pydevd_pycharm
@@ -45,7 +45,14 @@ from . import tools
 
 from . import help_render
 
-from PyQt5.QtCore import QT_VERSION_STR, PYQT_VERSION_STR
+SETTINGS_FILEPATH = os.path.join(os.path.dirname(__file__), 'settings.json')
+DEFAULT_SETTINGS = {
+    'snapshots_directory': os.path.join(os.path.dirname(__file__), 'Snapshots/'),
+}
+
+if not os.path.exists(SETTINGS_FILEPATH):
+    with open(SETTINGS_FILEPATH, 'w') as f:
+        print(DEFAULT_SETTINGS, file=f)
 
 
 class LayerTreeTools:
