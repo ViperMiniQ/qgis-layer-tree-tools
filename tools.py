@@ -576,3 +576,74 @@ def ask_question(title: str, text: str, left_button_text: str, right_button_text
         return False
 
     return None
+
+
+def get_layer_crs_authid(layer: QgsMapLayer) -> str:
+    crs = layer.crs().authid()
+
+    return crs if crs else 'None'
+
+
+def get_layer_crs_user_friendly_identifier(layer: QgsMapLayer) -> str:
+    crs = layer.crs().userFriendlyIdentifier()
+
+    return crs if crs else 'None'
+
+
+def get_layer_crs_description(layer: QgsMapLayer) -> str:
+    crs = layer.crs().description()
+
+    return crs if crs else 'None'
+
+
+def get_layer_crs_ellipsoid_acronym(layer: QgsMapLayer) -> str:
+    crs = layer.crs().ellipsoidAcronym()
+
+    return crs if crs else 'None'
+
+
+def get_layer_crs(layer: QgsMapLayer, method: str = 'authid') -> str:
+    """method: 'auth_id' | 'descriptive_name' | 'user_friendly_id' | 'ellipsoid_acronym'
+    defaults to 'authid' if wrong method is passed."""
+
+    possible_methods = ['authid', 'descriptive_name', 'user_friendly_id', 'ellipsoid_acronym']
+
+    if method not in possible_methods:
+        method = 'authid'
+
+    crs = ''
+
+    if method == 'authid':
+        crs = get_layer_crs_authid(layer)
+    if method == 'descriptive_name':
+        crs = get_layer_crs_description(layer)
+    if method == 'user_friendly_id':
+        crs = get_layer_crs_user_friendly_identifier(layer)
+    if method == 'ellipsoid_acronym':
+        crs = get_layer_crs_ellipsoid_acronym(layer)
+
+    return crs if crs else 'None'
+
+
+def get_all_layers_crs(method: str = 'authid') -> List[str]:
+    """method: 'auth_id' | 'descriptive_name' | 'user_friendly_id' | 'ellipsoid_acronym'
+    defaults to 'authid' if wrong method is passed."""
+
+    possible_methods = ['authid', 'descriptive_name', 'user_friendly_id', 'ellipsoid_acronym']
+
+    if method not in possible_methods:
+        method = 'authid'
+
+    layers = get_layers()
+    crs = []
+
+    for layer in layers.values():
+        layer_crs = get_layer_crs(layer, method)
+
+        if layer_crs is None:
+            continue
+
+        if layer_crs not in crs:
+            crs.append(layer_crs)
+
+    return crs

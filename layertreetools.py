@@ -756,12 +756,13 @@ class LayerTreeTools:
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-
-        dlg = SortAndGroupDialog()
-        # show the dialog
-        dlg.show()
+        if self.first_start:
+            self.first_start = False
+            self.dlg = SortAndGroupDialog()
+            # show the dialog
+        self.dlg.show()
         # Run the dialog event loop
-        result = dlg.exec_()
+        result = self.dlg.exec_()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and

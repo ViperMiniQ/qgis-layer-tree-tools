@@ -122,7 +122,15 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
                 "Refresh": lambda: self._refresh_encodings(),
                 "GroupSameValues": lambda: self.group_by_encoding()
             },
+            "CRS": {
+                "Name": "CRS",
+                "Sort": lambda: self.sort_by_crs(),
+                "Refresh": lambda: self._refresh_crs(),
+                "GroupSameValues": None
+            }
         }
+
+        self.buttonGroupCRS.buttonClicked.connect(self._refresh_crs)
 
         self.checkBoxGroupContainingSubstring.stateChanged.connect(self._manage_additional_actions_visibility)
         self.checkBoxGroupMatchingRegex.stateChanged.connect(self._manage_additional_actions_visibility)
@@ -146,6 +154,27 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
         else:
             self.checkBoxGroupMatchingRegex.setDisabled(False)
         self._state_changed_group_matching_regex()
+
+    def _refresh_crs(self):
+        method = ''
+
+        if self.radioButtonCRSUserFriendlyID.isChecked():
+            method = 'user_friendly_id'
+        if self.radioButtonCRSAuthID.isChecked():
+            method = 'auth_id'
+        if self.radioButtonCRSDescriptiveName.isChecked():
+            method = 'descriptive_name'
+        if self.radioButtonCRSEllipsoidAcronym.isChecked():
+            method = 'ellipsoid_acronym'
+
+        crs = tools.get_all_layers_crs(method)
+
+        self.listWidgetCRSOrder.clear()
+
+        if not crs:
+            return
+
+        self.listWidgetCRSOrder.addItems(crs)
 
     def _refresh_encodings(self):
         encodings = tools.get_encodings()
@@ -282,6 +311,17 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
                 group,
                 sorter.get_geometry_node_order_within_group(group, geometry_order)
             )
+
+    def sort_by_crs(self):
+        groups = self.get_groups_to_sort()
+
+        if not groups:
+            return
+
+        crs_order = self.get_crs_order()
+
+        for group in reversed(groups):
+            tools.move_nodes_to_group(group, sorter.get_node_order_by_crs(group, crs_order))
 
     def sort_by_name(self):
         groups = self.get_groups_to_sort()
@@ -489,6 +529,9 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
     def get_alphabetical_reverse(self) -> bool:
         """True if reverse"""
         return self.radioButtonZA.isChecked()
+
+    def get_crs_order(self) -> List[str]:
+        return [self.listWidgetCRSOrder.item(i).text() for i in range(self.listWidgetCRSOrder.model().rowCount())]
 
     def get_geometry_order(self) -> List[str]:
         return [self.listWidgetGeometry.item(i).text().lower() for i in range(self.listWidgetGeometry.model().rowCount())]

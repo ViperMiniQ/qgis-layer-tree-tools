@@ -308,3 +308,41 @@ def get_node_order_by_encoding(group: QgsLayerTreeGroup, encoding_order: List[st
 
     return sorted_nodes
 
+
+def get_node_order_by_crs(group: QgsLayerTreeGroup, crs_order: List[str]) -> List[QgsLayerTreeNode]:
+    if not isinstance(group, QgsLayerTreeGroup):
+        raise ValueError(f"group: {group} not QgsLayerTreeGroup instance.")
+
+    groups = []
+    crs = {}
+    unknown = []
+
+    for crs_ in crs_order:
+        crs[crs_] = []
+
+    for node in group.children():
+        if isinstance(node, QgsLayerTreeGroup):
+            groups.append(node)
+            continue
+
+        if isinstance(node, QgsLayerTreeLayer):
+            layer = node.layer()
+
+            layer_crs = tools.get_layer_crs_authid(layer)
+
+            if layer_crs not in crs.keys():
+                crs[layer_crs] = [node]
+                continue
+
+            crs[layer_crs].append(node)
+            continue
+
+        unknown.append(node)
+
+    sorted_nodes = []
+    for crs_ in crs_order:
+        sorted_nodes += crs[crs_]
+
+    sorted_nodes += unknown + groups
+
+    return sorted_nodes
