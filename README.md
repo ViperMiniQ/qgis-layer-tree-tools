@@ -508,6 +508,17 @@ If sidecar files are reported by QGIS, they are also included in sum.
   
 </pre>
 &nbsp;  
+### CRS
+&nbsp;
+Sorts layers based on their CRS (coordinate reference system).
+
+Options (each of the options lists same CRSs in different formats):
+  * user friendly identifier
+  * authority identifier
+  * descriptive name of the CRS
+  * ellipsoid acronym
+
+&nbsp;  
 ## GROUPING
 &nbsp;  
 Creates groups with the layers sharing the same selected attribute(s).  
@@ -600,6 +611,16 @@ If sidecar files are reported by QGIS, they are also included in sum.
 &nbsp;  
 Groups layers of the same filetype.  
 &nbsp;  
+### CRS
+&nbsp;
+Groups layers of the same CRS (coordinate reference system).
+
+Options (each of the options lists same CRSs in different formats and creates groups based on the listed names):
+  * user friendly identifier
+  * authority identifier
+  * descriptive name of the CRS
+  * ellipsoid acronym
+
 ## SNAPSHOT  
 &nbsp;  
 Snapshot is a simple copy of the current layer tree.    
@@ -666,6 +687,8 @@ Alongside shortcuts for Sorting and grouping and Snapshost, additional actions a
     - memory layers are ignored
     - copies can have original file names, or they can be renamed to the layer name
     - only characters allowed in file names when applying layer name are: [space, a-z, A-Z, 0-9, _] - if a layer name contains a character not allowed in file name, it is replaced with an underscore
+  + Expand groups with double click
+    - expands all groups in the layer tree on double click
 <!-- -->
 &nbsp;  
 Each of the actions can be done on:
