@@ -11,8 +11,10 @@
 ### FIXED
 &nbsp;
 - when copying layer files, if a file contained multiple dots in its name, the extension(s) would be doubled
-- sort and group dialog won't be rebuilt every time it is opened
 - snapshot loading misreporting layers failed to load when copying vector layers to memory
+- CRS not being applied to layers containing non EPSG authority CRS when loading snapshots 
+- sort and group dialog won't be rebuilt every time it is opened
+- snapshots dialog won't be rebuilt every time it is opened
 <!-- -->
 &nbsp;
 ## 1.2.1

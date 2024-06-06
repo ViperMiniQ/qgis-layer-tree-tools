@@ -242,4 +242,5 @@ class Snapshooter(QgsTask):
             "type": tools.get_layer_type(layer),
             "features": tools.get_layer_features(layer) if copy_features else [],
             "attributes": convert_attributes_to_dict_list(tools.get_layer_attributes(layer)) if copy_attributes else [],
+            "crs": tools.get_layer_crs_as_wkt(layer),
         }

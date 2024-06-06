@@ -647,3 +647,11 @@ def get_all_layers_crs(method: str = 'authid') -> List[str]:
             crs.append(layer_crs)
 
     return crs
+
+
+def get_layer_crs_as_wkt(layer: QgsMapLayer) -> str:
+    return layer.crs().toWkt()
+
+
+def set_layer_crs_from_wkt(layer: QgsMapLayer, wkt: str) -> str:
+    return layer.crs().fromWkt(wkt)

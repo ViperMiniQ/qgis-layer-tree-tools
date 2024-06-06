@@ -37,7 +37,7 @@ from qgis.PyQt.QtWidgets import *
 from .resources import *
 # Import the code for the dialog
 from .layer_tree_tools_dialog import SortAndGroupDialog
-from .snapshooter_dialog import snapshooterDialog
+from . import snapshooter_dialog
 import os.path
 
 from . import additional_actions
@@ -86,6 +86,7 @@ class LayerTreeTools:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        self.expanding_on_doubleclick = False
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -459,7 +460,13 @@ class LayerTreeTools:
 
         group.setExpanded(True)
 
+    def _expand_selected_group_and_save_settings(self, state: bool):
+        self._expand_selected_group(state)
+        snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click'] = state
+        snapshooter_dialog.write_settings()
+
     def _expand_selected_group(self, state: bool):
+        self.expanding_on_doubleclick = not self.expanding_on_doubleclick
         self.iface.layerTreeView().doubleClicked.connect(self.expand_doubleclicked_group)
 
     def _create_expanding_groups_with_doubleclick_action(self, parent):
@@ -468,7 +475,7 @@ class LayerTreeTools:
             parent=parent,
             checkable=True
         )
-        expand_groups_with_doubleclick_action.triggered.connect(self._expand_selected_group)
+        expand_groups_with_doubleclick_action.triggered.connect(self._expand_selected_group_and_save_settings)
 
         return expand_groups_with_doubleclick_action
 
@@ -491,7 +498,8 @@ class LayerTreeTools:
 
         additional_actions_menu.addSeparator()
 
-        additional_actions_menu.addAction(self._create_expanding_groups_with_doubleclick_action(additional_actions_menu))
+        expand_groups_with_doubleclick_action = self._create_expanding_groups_with_doubleclick_action(additional_actions_menu)
+        additional_actions_menu.addAction(expand_groups_with_doubleclick_action)
 
         return additional_actions_menu
 
@@ -629,7 +637,13 @@ class LayerTreeTools:
         )
         self.layers_panel_actions.append(self.action_additional_actions)
 
-        self.action_additional_actions.setMenu(self._get_additional_actions_menu())
+        additional_actions_menu = self._get_additional_actions_menu()
+        self.action_additional_actions.setMenu(additional_actions_menu)
+        if snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click']:
+            for qaction in additional_actions_menu.actions():
+                if qaction.text() == 'Expand groups with double click':
+                    qaction.trigger()
+                    break
 
         layers_panel_toolbar = self._get_layers_panel_toolbar()
 
@@ -655,7 +669,13 @@ class LayerTreeTools:
             self.tr('Additional actions'),
             self.iface.mainWindow()
         )
-        self.action_plugin_toolbar_additional_actions.setMenu(self._get_additional_actions_menu())
+        additional_actions_menu = self._get_additional_actions_menu()
+        if snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click']:
+            for qaction in additional_actions_menu.actions():
+                if qaction.text() == 'Expand groups with double click':
+                    additional_actions_menu.removeAction(qaction)
+                    break
+        self.action_plugin_toolbar_additional_actions.setMenu(additional_actions_menu)
 
         self.action_sorter.triggered.connect(self.run)
         self.action_snapshooter.triggered.connect(self.run_snapshooter)
@@ -735,6 +755,9 @@ class LayerTreeTools:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        if self.expanding_on_doubleclick:
+            self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubleclicked_group)
+
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.tr(u'&layer_tree_tools'),
@@ -768,7 +791,7 @@ class LayerTreeTools:
             pass
 
     def run_snapshooter(self):
-        dlg = snapshooterDialog()
+        dlg = snapshooter_dialog.snapshooterDialog()
         # show the dialog
         dlg.show()
         # Run the dialog event loop

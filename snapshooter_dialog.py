@@ -43,6 +43,7 @@ Path(SNAPSHOT_DIR).mkdir(parents=True, exist_ok=True)
 SETTINGS_FILEPATH = os.path.join(os.path.dirname(__file__), 'settings.json')
 DEFAULT_SETTINGS = {
     "snapshots_directory": Path(os.path.join(os.path.dirname(__file__), 'Snapshots')).as_posix() + '/',
+    "expand_group_double_click": False
 }
 CURRENT_SETTINGS = None
 
@@ -293,6 +294,9 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
                         continue
 
                 map_layer = QgsProject.instance().addMapLayer(layer, False)
+
+                if 'crs' in value.keys():
+                    tools.set_layer_crs_from_wkt(map_layer, value['crs'])
 
                 group.addLayer(map_layer)
 
