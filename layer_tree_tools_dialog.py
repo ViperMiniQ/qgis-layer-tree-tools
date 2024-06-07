@@ -242,15 +242,17 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
 
         ignore_groups = self.get_ignore_groups()
         group_singles = self.get_group_singles()
+        case_sensitive = self.get_group_name_case_sensitive()
 
         if self.get_group_containing_substring():
             substring = self.get_group_substring()
+            case_sensitive_substring = self.get_group_substring_case_sensitive()
 
             if not substring:
                 return
 
             for group in reversed(groups):
-                grouper.group_containing_substring(group, substring, ignore_groups, group_singles)
+                grouper.group_containing_substring(group, substring, ignore_groups, group_singles, case_sensitive_substring)
 
             return
 
@@ -266,7 +268,7 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         for group in reversed(groups):
-            grouper.group_same_name(group, ignore_groups, group_singles)
+            grouper.group_same_name(group, ignore_groups, group_singles, case_sensitive)
 
     def group_by_crs(self):
         groups = self.get_groups_to_group_values()
@@ -618,9 +620,11 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
     def _state_changed_group_containing_substring(self, event=None):
         if self.checkBoxGroupContainingSubstring.isChecked():
             self.lineEditGroupContainingSubstring.setDisabled(False)
+            self.checkBoxGroupNameSubstringCaseSensitive.setDisabled(False)
             return
 
         self.lineEditGroupContainingSubstring.setDisabled(True)
+        self.checkBoxGroupNameSubstringCaseSensitive.setDisabled(True)
 
     def _get_name_sort_type(self) -> str:
         if self.radioButtonClassicSorting.isChecked():
@@ -634,11 +638,17 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
     def get_group_matching_regex(self) -> bool:
         return self.checkBoxGroupMatchingRegex.isChecked()
 
+    def get_group_substring_case_sensitive(self) -> bool:
+        return self.checkBoxGroupNameSubstringCaseSensitive.isChecked()
+
     def get_group_substring(self) -> str:
         return self.lineEditGroupContainingSubstring.text()
 
     def get_group_regex(self) -> str:
         return self.lineEditGroupMatchingRegex.text()
+
+    def get_group_name_case_sensitive(self) -> bool:
+        return self.checkBoxGroupNameCaseSensitive.isChecked()
 
     def get_geometries_to_group(self) -> List[int]:
         included_geometries = []

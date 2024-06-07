@@ -16,7 +16,7 @@ import re
 # TODO: make a group for unique values?
 
 
-def group_same_name(group: QgsLayerTreeGroup, ignore_groups: bool = False, group_single: bool = False) -> bool:
+def group_same_name(group: QgsLayerTreeGroup, ignore_groups: bool = False, group_single: bool = False, case_sensitive: bool = True) -> bool:
     if not tools.is_node_a_group(group):
         return False
 
@@ -27,6 +27,9 @@ def group_same_name(group: QgsLayerTreeGroup, ignore_groups: bool = False, group
             continue
 
         name = node.name()
+        if not case_sensitive:
+            name = name.lower()
+
         if name in nodes.keys():
             nodes[name].append(node)
             continue
@@ -41,7 +44,7 @@ def group_same_name(group: QgsLayerTreeGroup, ignore_groups: bool = False, group
     return True
 
 
-def group_containing_substring(group: QgsLayerTreeGroup, substring: str, ignore_groups: bool = False, group_singles: bool = False) -> bool:
+def group_containing_substring(group: QgsLayerTreeGroup, substring: str, ignore_groups: bool = False, group_singles: bool = False, case_sensitive: bool = False) -> bool:
     if not tools.is_node_a_group(group):
         return False
 
@@ -51,8 +54,14 @@ def group_containing_substring(group: QgsLayerTreeGroup, substring: str, ignore_
         if ignore_groups and tools.is_node_a_group(node):
             continue
 
-        if substring in node.name():
+        if case_sensitive:
+            if substring in node.name():
+                nodes.append(node)
+            continue
+
+        if substring.lower() in node.name().lower():
             nodes.append(node)
+            continue
 
     if not group_singles and len(nodes) <= 1:
         return False
