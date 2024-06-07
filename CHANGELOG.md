@@ -17,6 +17,7 @@
 - sort and group dialog won't be rebuilt every time it is opened
 - snapshots dialog won't be rebuilt every time it is opened
 - feature count not working when sorting lowest to highest due to change of GUI element name
+- grouping by name failing due to parsing of wrong parameters
 <!-- -->
 &nbsp;
 ## 1.2.1

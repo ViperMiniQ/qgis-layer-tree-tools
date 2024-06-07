@@ -28,7 +28,7 @@ def group_same_name(group: QgsLayerTreeGroup, ignore_groups: bool = False, group
 
         name = node.name()
         if name in nodes.keys():
-            nodes[name].append(name)
+            nodes[name].append(node)
             continue
 
         nodes[name] = [node]
