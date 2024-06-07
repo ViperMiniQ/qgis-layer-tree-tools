@@ -579,7 +579,7 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
             return 'top'
 
     def get_feature_count_reverse(self) -> bool:
-        return self.radioButtonLessToMost.isChecked()
+        return self.radioButtonHighestToLowest.isChecked()
 
     def get_size_on_disk_reverse(self) -> bool:
         return self.radioButtonSizeOnDiskDescending.isChecked()

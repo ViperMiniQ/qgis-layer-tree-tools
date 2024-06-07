@@ -6,6 +6,7 @@
 - sorting and grouping now possible based on CRS
 - additional action to expand/collapse groups on double click
 - snapshots directory can now be set (defaults to /Snapshots inside plugin directory)
+- settings for snapshots directory and expanding groups option are saved between sessions
 <!-- -->
 &nbsp;
 ### FIXED
@@ -15,6 +16,7 @@
 - CRS not being applied to layers containing non EPSG authority CRS when loading snapshots 
 - sort and group dialog won't be rebuilt every time it is opened
 - snapshots dialog won't be rebuilt every time it is opened
+- feature count not working when sorting lowest to highest due to change of GUI element name
 <!-- -->
 &nbsp;
 ## 1.2.1
