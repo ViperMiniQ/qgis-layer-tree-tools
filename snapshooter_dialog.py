@@ -260,7 +260,7 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
             else:
                 state = bool(int(state))
 
-            if not (set(snapshooter.Snapshooter.LAYER_DETAILS_KEYS) == set(list(value.keys()))):
+            if 'filepath' not in value.keys():
                 if '(' not in key or ')' not in key:
                     continue
                 group_name = key[key.find("(") + 1:key.find(")")]
