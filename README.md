@@ -539,11 +539,10 @@ Additional option:
 &nbsp;  
 ### NAME
 &nbsp;  
-Groups layers of the same name.  
-Names must match exactly.  
+Groups layers of the same name.   
 &nbsp;  
 Options:  
-   
+  * optionally, can be case-sensitive
   * Nodes containing same substring can be grouped together
   * Groups (group names) can be ignored when grouping by name  
   * Nodes can be grouped by matching regular expression
@@ -635,6 +634,7 @@ As the snapshot stores an absolute path, there is no option to 'search for' or '
 If a load fails on some of the layers, a window containing name, type and datasource will display information of the layers that have failed to load.  
 
 As of ver 1.1, snapshots include symbology and visibility information.
+As of ver 1.3.0, snapshots include CRS information in WKT format.
 &nbsp;  
 ### CREATING SNAPSHOT
 &nbsp;  

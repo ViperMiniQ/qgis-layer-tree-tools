@@ -7,6 +7,7 @@
 - additional action to expand/collapse groups on double click
 - snapshots directory can now be set (defaults to /Snapshots inside plugin directory)
 - settings for snapshots directory and expanding groups option are saved between sessions
+- grouping by name is now optionally case-sensitive
 <!-- -->
 &nbsp;
 ### FIXED
