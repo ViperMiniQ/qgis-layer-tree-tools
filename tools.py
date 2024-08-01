@@ -20,8 +20,21 @@ from qgis.core import (
     NULL,
     QgsApplication,
     QgsTask,
-    QgsFileUtils
+    QgsFileUtils,
+    QgsProviderRegistry
 )
+
+try:
+    from qgis.core import QgsAbstractDatabaseProviderConnection  # Added in version 3.10.
+    qgs_abstract_database_provider_connection = True
+except ImportError:
+    qgs_abstract_database_provider_connection = False
+
+try:
+    from qgis.core import QgsAnnotationLayer  # Added in version 3.16.
+    qgs_annotation_layer = True
+except ImportError:
+    qgs_annotation_layer = False
 
 from PyQt5.QtCore import QVariant
 from PyQt5.QtXml import QDomDocument
@@ -497,9 +510,13 @@ def truncate_layer(layer: QgsVectorLayer):
 
 
 def commit_changes_to_layer(layer):
-    """QgsVectorLayer | QgsRasterLayer"""
+    """QgsVectorLayer"""
+    if not isinstance(layer, QgsVectorLayer):
+        return
+
     if not layer.isEditable():
         return
+
     layer.commitChanges()
 
 
@@ -655,3 +672,50 @@ def get_layer_crs_as_wkt(layer: QgsMapLayer) -> str:
 
 def set_layer_crs_from_wkt(layer: QgsMapLayer, wkt: str) -> str:
     return layer.crs().fromWkt(wkt)
+
+
+def get_layer_database_connection(layer: QgsMapLayer):  # -> QgsAbstractDatabaseProviderConnection:
+    return QgsProviderRegistry.instance().providerMetadata(
+        layer.dataProvider().name()).createConnection(
+        layer.dataProvider().dataSourceUri(), {}
+    )
+
+
+def check_layer_has_database_connection(layer: QgsMapLayer) -> bool:
+    try:
+        get_layer_database_connection(layer)
+    except Exception:
+        return False
+    # if 'connection' not in layer.dataProvider().__dict__:
+    #     return False
+    #
+    # if not callable(layer.dataProvider().connection):
+    #     return False
+
+    return True
+
+
+def vacuum_database_connection(connection):  # QgsAbstractDatabaseProviderConnection):
+    connection.vacuum(None, None)
+
+
+def vacuum_layer_database(layer: QgsMapLayer):
+    if not qgs_abstract_database_provider_connection:
+        return
+
+    if not (is_layer_a_vector_layer(layer) or is_layer_a_raster(layer)):
+        return
+
+    if not check_layer_has_database_connection(layer):
+        return
+
+    connection = get_layer_database_connection(layer)
+    vacuum_database_connection(connection)
+
+
+def is_layer_an_annotation_layer(layer: QgsMapLayer) -> bool:
+    if not qgs_annotation_layer:
+        return False
+
+    return isinstance(layer, QgsAnnotationLayer)
+

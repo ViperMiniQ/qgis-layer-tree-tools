@@ -1,5 +1,13 @@
 # Change log
 &nbsp;
+## 1.4.0
+&nbsp;
+### NEW
+- additional action to vacuum the database connection for layers
+- additional action to convert Annotation layer to a regular vector layer
+### CHANGED
+- when commiting changes, only QgsVectorLayer objects are taken into account
+&nbsp;
 ## 1.3.0
 &nbsp;
 ### NEW

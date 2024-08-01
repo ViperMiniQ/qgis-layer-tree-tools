@@ -43,7 +43,8 @@ Path(SNAPSHOT_DIR).mkdir(parents=True, exist_ok=True)
 SETTINGS_FILEPATH = os.path.join(os.path.dirname(__file__), 'settings.json')
 DEFAULT_SETTINGS = {
     "snapshots_directory": Path(os.path.join(os.path.dirname(__file__), 'Snapshots')).as_posix() + '/',
-    "expand_group_double_click": False
+    "expand_group_double_click": False,
+    "expand_layer_double_click": False
 }
 CURRENT_SETTINGS = None
 
@@ -55,12 +56,17 @@ if not os.path.exists(SETTINGS_FILEPATH):
 
 def load_settings():
     global CURRENT_SETTINGS
-    with open(SETTINGS_FILEPATH, 'r') as f:
-        CURRENT_SETTINGS = json.load(f)
-        if not CURRENT_SETTINGS['snapshots_directory'].endswith('/'):
-            CURRENT_SETTINGS['snapshots_directory'] += '/'
+    try:
+        with open(SETTINGS_FILEPATH, 'r') as f:
+            CURRENT_SETTINGS = json.load(f)
+            if not CURRENT_SETTINGS['snapshots_directory'].endswith('/'):
+                CURRENT_SETTINGS['snapshots_directory'] += '/'
 
-        snapshooter.Snapshooter.SNAPSHOT_DIR = CURRENT_SETTINGS['snapshots_directory']
+            snapshooter.Snapshooter.SNAPSHOT_DIR = CURRENT_SETTINGS['snapshots_directory']
+    except Exception:
+        CURRENT_SETTINGS = DEFAULT_SETTINGS
+        write_settings()
+
 
 def write_settings():
     with open(SETTINGS_FILEPATH, 'w') as f:

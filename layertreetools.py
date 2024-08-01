@@ -86,7 +86,8 @@ class LayerTreeTools:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
-        self.expanding_on_doubleclick = False
+        self.expanding_groups_on_doubleclick = False
+        self.expanding_layers_on_doubleclick = False
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -312,6 +313,38 @@ class LayerTreeTools:
 
         additional_actions.copy_layer_files_making_a_dir_tree(selected_groups[0], destination_directory, res)
 
+    def _create_vacuum_database_action(self, parent):
+        vacuum_database_menu = QMenu()
+
+        vacuum_database_all_layers = QAction(
+            self.tr("Vacuum all layers"),
+            parent=vacuum_database_menu
+        )
+        vacuum_database_all_layers.triggered.connect(additional_actions.vacumm_all_layers)
+        vacuum_database_menu.addAction(vacuum_database_all_layers)
+
+        vacuum_database_selected_groups = QAction(
+            self.tr("Vacuum layers in selected group(s)"),
+            parent=vacuum_database_menu
+        )
+        vacuum_database_selected_groups.triggered.connect(additional_actions.vacuum_all_layers_in_group)
+        vacuum_database_menu.addAction(vacuum_database_selected_groups)
+
+        vacuum_database_selected_layers = QAction(
+            self.tr("Vacuum selected layers"),
+            parent=vacuum_database_menu
+        )
+        vacuum_database_selected_layers.triggered.connect(additional_actions.vacuum_selected_layers)
+        vacuum_database_menu.addAction(vacuum_database_selected_layers)
+
+        vacuum_database_action = QAction(
+            self.tr("Vacuum database"),
+            parent=parent
+        )
+        vacuum_database_action.setMenu(vacuum_database_menu)
+
+        return vacuum_database_action
+
     def _create_feature_count_action(self, parent):
         toggle_feature_count_menu = QMenu()
 
@@ -446,19 +479,36 @@ class LayerTreeTools:
 
         return reload_layers
 
-    def expand_doubleclicked_group(self):
+    def expand_doubledclicked_layers(self):
+        selected_layers = tools.get_selected_layers()
+
+        if not selected_layers:
+            return
+
+        for layer in selected_layers:
+            if layer.isExpanded():
+                layer.setExpanded(False)
+                continue
+
+            layer.setExpanded(True)
+
+    def expand_doubleclicked_groups(self):
         selected_groups = tools.get_selected_groups()
 
         if not selected_groups:
             return
 
-        group = selected_groups[0]
+        for group in selected_groups:
+            if group.isExpanded():
+                group.setExpanded(False)
+                continue
 
-        if group.isExpanded():
-            group.setExpanded(False)
-            return
+            group.setExpanded(True)
 
-        group.setExpanded(True)
+    def _expand_selected_layer_and_save_settings(self, state: bool):
+        self._expand_selected_layer(state)
+        snapshooter_dialog.CURRENT_SETTINGS['expand_layer_double_click'] = state
+        snapshooter_dialog.write_settings()
 
     def _expand_selected_group_and_save_settings(self, state: bool):
         self._expand_selected_group(state)
@@ -466,8 +516,22 @@ class LayerTreeTools:
         snapshooter_dialog.write_settings()
 
     def _expand_selected_group(self, state: bool):
-        self.expanding_on_doubleclick = not self.expanding_on_doubleclick
-        self.iface.layerTreeView().doubleClicked.connect(self.expand_doubleclicked_group)
+        self.expanding_groups_on_doubleclick = not self.expanding_groups_on_doubleclick
+        self.iface.layerTreeView().doubleClicked.connect(self.expand_doubleclicked_groups)
+
+    def _expand_selected_layer(self, state: bool):
+        self.expanding_layers_on_doubleclick = not self.expanding_layers_on_doubleclick
+        self.iface.layerTreeView().doubleClicked.connect(self.expand_doubledclicked_layers)
+
+    def _create_expanding_layers_with_doubleclick_action(self, parent):
+        expand_layers_with_doubleclick_action = QAction(
+            self.tr("Expand layers with double click"),
+            parent=parent,
+            checkable=True
+        )
+        expand_layers_with_doubleclick_action.triggered.connect(self._expand_selected_layer_and_save_settings)
+
+        return expand_layers_with_doubleclick_action
 
     def _create_expanding_groups_with_doubleclick_action(self, parent):
         expand_groups_with_doubleclick_action = QAction(
@@ -478,6 +542,17 @@ class LayerTreeTools:
         expand_groups_with_doubleclick_action.triggered.connect(self._expand_selected_group_and_save_settings)
 
         return expand_groups_with_doubleclick_action
+
+    def _get_annotation_layer_converter_action(self, parent):
+        convert_selected_annotation_layer = QAction(
+            self.tr("Convert selected annotation layer"),
+            parent=parent
+        )
+        convert_selected_annotation_layer.triggered.connect(
+            additional_actions.convert_selected_annotation_layer_to_memory_layers
+        )
+
+        return convert_selected_annotation_layer
 
     def _get_additional_actions_menu(self):
         additional_actions_menu = QMenu()
@@ -495,11 +570,21 @@ class LayerTreeTools:
         additional_actions_menu.addSeparator()
 
         additional_actions_menu.addAction(self._export_layers_to_dir_action(additional_actions_menu))
-
         additional_actions_menu.addSeparator()
+
+        if tools.qgs_abstract_database_provider_connection:
+            additional_actions_menu.addAction(self._create_vacuum_database_action(additional_actions_menu))
+            additional_actions_menu.addSeparator()
+
+        if tools.qgs_annotation_layer:
+            additional_actions_menu.addAction(self._get_annotation_layer_converter_action(additional_actions_menu))
+            additional_actions_menu.addSeparator()
 
         expand_groups_with_doubleclick_action = self._create_expanding_groups_with_doubleclick_action(additional_actions_menu)
         additional_actions_menu.addAction(expand_groups_with_doubleclick_action)
+
+        expand_layers_with_doubleclick_action = self._create_expanding_layers_with_doubleclick_action(additional_actions_menu)
+        additional_actions_menu.addAction(expand_layers_with_doubleclick_action)
 
         return additional_actions_menu
 
@@ -755,8 +840,11 @@ class LayerTreeTools:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-        if self.expanding_on_doubleclick:
-            self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubleclicked_group)
+        if self.expanding_groups_on_doubleclick:
+            self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubleclicked_groups)
+
+        if self.expanding_layers_on_doubleclick:
+            self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubledclicked_layers)
 
         for action in self.actions:
             self.iface.removePluginMenu(

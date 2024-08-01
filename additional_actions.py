@@ -15,7 +15,8 @@ from qgis.core import (
     NULL,
     QgsApplication,
     QgsTask,
-    Qgis
+    Qgis,
+    QgsGeometry
 )
 from . import tools
 from typing import Dict
@@ -188,3 +189,77 @@ class FileCopier(QgsTask):
 
     def finished(self, result):
         pass
+
+
+def vacuum_selected_layers():
+    for layer in tools.get_selected_layers():
+        tools.vacuum_layer_database(layer)
+
+
+def vacuum_all_layers_in_group(group: QgsLayerTreeGroup):
+    for node in group.children():
+        if tools.is_node_a_layer(node):
+            layer = node.layer()
+            tools.vacuum_layer_database(layer)
+
+
+def vacumm_all_layers():
+    for layer in tools.get_layers():
+        tools.vacuum_layer_database(layer)
+
+
+def convert_selected_annotation_layer_to_memory_layers():
+    selected_layers = tools.get_selected_layers()
+
+    if not selected_layers:
+        return
+
+    selected_layer = selected_layers[0]
+
+    if not tools.is_layer_an_annotation_layer(selected_layer):
+        return
+
+    polygons = []
+    points = []
+    lines = []
+
+    for item in selected_layer.items():
+        feature = selected_layer.items()[item]
+
+        new_feature = QgsFeature()
+        if feature.type() == 'polygon':
+            geometry = feature.geometry().toPolygon()
+            new_feature.setGeometry(geometry)
+            polygons.append(new_feature)
+            continue
+
+        if feature.type() in ['point', 'marker']:
+            geometry = QgsGeometry.fromPointXY(feature.geometry())
+            new_feature.setGeometry(geometry)
+            points.append(new_feature)
+            continue
+
+        if feature.type() == 'linestring':
+            geometry = feature.geometry().curveToLine()
+            new_feature.setGeometry(geometry)
+            lines.append(new_feature)
+            continue
+
+    uri_polygons = f"multipolygon?crs={selected_layer.crs().authid()}"
+    uri_points = f"point?crs={selected_layer.crs().authid()}"
+    uri_lines = f"multilinestring?crs={selected_layer.crs().authid()}"
+
+    memory_layer_polygons = QgsVectorLayer(uri_polygons, "Annotation polygons", "memory")
+    memory_layer_points = QgsVectorLayer(uri_points, "Annotation points", "memory")
+    memory_layer_lines = QgsVectorLayer(uri_lines, "Annotation lines", "memory")
+
+    if polygons:
+        memory_layer_polygons.dataProvider().addFeatures(polygons)
+    if points:
+        memory_layer_points.dataProvider().addFeatures(points)
+    if lines:
+        memory_layer_lines.dataProvider().addFeatures(lines)
+
+    QgsProject.instance().addMapLayer(memory_layer_polygons)
+    QgsProject.instance().addMapLayer(memory_layer_points)
+    QgsProject.instance().addMapLayer(memory_layer_lines)
