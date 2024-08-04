@@ -18,6 +18,7 @@ from qgis.core import (
     Qgis,
     QgsGeometry
 )
+from qgis.utils import iface
 from . import tools
 from typing import Dict
 
@@ -263,3 +264,9 @@ def convert_selected_annotation_layer_to_memory_layers():
     QgsProject.instance().addMapLayer(memory_layer_polygons)
     QgsProject.instance().addMapLayer(memory_layer_points)
     QgsProject.instance().addMapLayer(memory_layer_lines)
+
+    iface.messageBar().pushMessage(
+        "Layer Tree Tools",
+        "Annotation layer successfully converted to memory layers",
+        Qgis.Success
+    )

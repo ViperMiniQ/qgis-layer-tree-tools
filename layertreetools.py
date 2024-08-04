@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import QMenu, QAction
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import *
+from qgis.PyQt.QtGui import QKeySequence
 
 # from qgis.PyQt.QtWidgets import QAction
 
@@ -44,6 +45,10 @@ from . import additional_actions
 from . import tools
 
 from . import help_render
+
+from qgis.core import (
+    QgsProject
+)
 
 
 class LayerTreeTools:
@@ -87,7 +92,6 @@ class LayerTreeTools:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         self.expanding_groups_on_doubleclick = False
-        self.expanding_layers_on_doubleclick = False
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -479,19 +483,6 @@ class LayerTreeTools:
 
         return reload_layers
 
-    def expand_doubledclicked_layers(self):
-        selected_layers = tools.get_selected_layers()
-
-        if not selected_layers:
-            return
-
-        for layer in selected_layers:
-            if layer.isExpanded():
-                layer.setExpanded(False)
-                continue
-
-            layer.setExpanded(True)
-
     def expand_doubleclicked_groups(self):
         selected_groups = tools.get_selected_groups()
 
@@ -505,33 +496,14 @@ class LayerTreeTools:
 
             group.setExpanded(True)
 
-    def _expand_selected_layer_and_save_settings(self, state: bool):
-        self._expand_selected_layer(state)
-        snapshooter_dialog.CURRENT_SETTINGS['expand_layer_double_click'] = state
-        snapshooter_dialog.write_settings()
-
-    def _expand_selected_group_and_save_settings(self, state: bool):
-        self._expand_selected_group(state)
+    def _expand_selected_group_on_double_button_click_and_save_settings(self, state: bool):
+        self._expand_selected_group_on_double_button_click(state)
         snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click'] = state
         snapshooter_dialog.write_settings()
 
-    def _expand_selected_group(self, state: bool):
+    def _expand_selected_group_on_double_button_click(self, state: bool):
         self.expanding_groups_on_doubleclick = not self.expanding_groups_on_doubleclick
         self.iface.layerTreeView().doubleClicked.connect(self.expand_doubleclicked_groups)
-
-    def _expand_selected_layer(self, state: bool):
-        self.expanding_layers_on_doubleclick = not self.expanding_layers_on_doubleclick
-        self.iface.layerTreeView().doubleClicked.connect(self.expand_doubledclicked_layers)
-
-    def _create_expanding_layers_with_doubleclick_action(self, parent):
-        expand_layers_with_doubleclick_action = QAction(
-            self.tr("Expand layers with double click"),
-            parent=parent,
-            checkable=True
-        )
-        expand_layers_with_doubleclick_action.triggered.connect(self._expand_selected_layer_and_save_settings)
-
-        return expand_layers_with_doubleclick_action
 
     def _create_expanding_groups_with_doubleclick_action(self, parent):
         expand_groups_with_doubleclick_action = QAction(
@@ -539,7 +511,7 @@ class LayerTreeTools:
             parent=parent,
             checkable=True
         )
-        expand_groups_with_doubleclick_action.triggered.connect(self._expand_selected_group_and_save_settings)
+        expand_groups_with_doubleclick_action.triggered.connect(self._expand_selected_group_on_double_button_click_and_save_settings)
 
         return expand_groups_with_doubleclick_action
 
@@ -582,9 +554,6 @@ class LayerTreeTools:
 
         expand_groups_with_doubleclick_action = self._create_expanding_groups_with_doubleclick_action(additional_actions_menu)
         additional_actions_menu.addAction(expand_groups_with_doubleclick_action)
-
-        expand_layers_with_doubleclick_action = self._create_expanding_layers_with_doubleclick_action(additional_actions_menu)
-        additional_actions_menu.addAction(expand_layers_with_doubleclick_action)
 
         return additional_actions_menu
 
@@ -759,7 +728,7 @@ class LayerTreeTools:
             for qaction in additional_actions_menu.actions():
                 if qaction.text() == 'Expand groups with double click':
                     additional_actions_menu.removeAction(qaction)
-                    break
+
         self.action_plugin_toolbar_additional_actions.setMenu(additional_actions_menu)
 
         self.action_sorter.triggered.connect(self.run)
@@ -842,9 +811,6 @@ class LayerTreeTools:
         """Removes the plugin menu item and icon from QGIS GUI."""
         if self.expanding_groups_on_doubleclick:
             self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubleclicked_groups)
-
-        if self.expanding_layers_on_doubleclick:
-            self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubledclicked_layers)
 
         for action in self.actions:
             self.iface.removePluginMenu(
