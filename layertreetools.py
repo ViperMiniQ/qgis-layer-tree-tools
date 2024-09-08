@@ -91,7 +91,6 @@ class LayerTreeTools:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         self.expanding_groups_on_doubleclick = False
-        self.move_nodes_on_alt_key = False
 
         self.key_press_filter = None
 
@@ -485,27 +484,6 @@ class LayerTreeTools:
 
         return reload_layers
 
-    def move_nodes_on_alt_key_press(self, event=None, up: bool = True):
-        selected_nodes = tools.get_selected_nodes()
-
-        if not selected_nodes:
-            return
-
-        node = selected_nodes[0]
-
-        node_index = tools.get_node_index_in_group(node)
-
-        if node_index == -1:
-            return
-
-        if not up and tools.get_no_of_node_parent_children(node) == node_index + 1:
-            return
-
-        if up and node_index == 0:
-            return
-
-        tools.insert_node_at_parent_index(node, node_index - 1 if up else node_index + 2, True)
-
     def expand_doubleclicked_groups(self):
         selected_groups = tools.get_selected_groups()
 
@@ -521,7 +499,6 @@ class LayerTreeTools:
 
     def _move_nodes_on_alt_key_pres_and_save_settings(self, state: bool):
         self._move_nodes_on_alt_press(state)
-        # self.iface.layerTreeView().keyPressEvent = self.move_nodes_on_alt_key_press
         snapshooter_dialog.CURRENT_SETTINGS['move_nodes_on_alt_key'] = state
         snapshooter_dialog.write_settings()
 
@@ -531,7 +508,10 @@ class LayerTreeTools:
         snapshooter_dialog.write_settings()
 
     def _move_nodes_on_alt_press(self, state: bool):
-        self.move_nodes_on_alt_key = not self.move_nodes_on_alt_key
+        if self.key_press_filter is not None:
+            self.iface.layerTreeView().removeEventFilter(self.key_press_filter)
+            self.key_press_filter = None
+            return
 
         self.key_press_filter = KeyPressEventFilter()
         self.iface.layerTreeView().installEventFilter(self.key_press_filter)
