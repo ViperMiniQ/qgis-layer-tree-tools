@@ -533,15 +533,6 @@ class LayerTreeTools:
     def _move_nodes_on_alt_press(self, state: bool):
         self.move_nodes_on_alt_key = not self.move_nodes_on_alt_key
 
-        # Get the meta-object of the instance
-        meta_object = self.iface.layerTreeView().metaObject()
-
-        # Iterate through the methods and filter out the signals
-        for i in range(meta_object.methodCount()):
-            method = meta_object.method(i)
-            if method.methodType() == QMetaMethod.Signal:
-                print(method.name().data().decode())
-
         self.key_press_filter = KeyPressEventFilter()
         self.iface.layerTreeView().installEventFilter(self.key_press_filter)
 
