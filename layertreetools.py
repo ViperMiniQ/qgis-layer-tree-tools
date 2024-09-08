@@ -23,14 +23,13 @@
 """
 import os
 
-from PyQt5.QtWidgets import QMenu, QAction
+from qgis.PyQt.QtWidgets import QMenu, QAction
 # import pydevd_pycharm
 # pydevd_pycharm.settrace('127.0.0.1', port=53100, stdoutToServer=True, stderrToServer=True)
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QMetaMethod, QObject, QEvent
+from qgis.PyQt.QtGui import QIcon, QKeyEvent
 from qgis.PyQt.QtWidgets import *
-from qgis.PyQt.QtGui import QKeySequence
 
 # from qgis.PyQt.QtWidgets import QAction
 
@@ -92,6 +91,9 @@ class LayerTreeTools:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         self.expanding_groups_on_doubleclick = False
+        self.move_nodes_on_alt_key = False
+
+        self.key_press_filter = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -483,6 +485,27 @@ class LayerTreeTools:
 
         return reload_layers
 
+    def move_nodes_on_alt_key_press(self, event=None, up: bool = True):
+        selected_nodes = tools.get_selected_nodes()
+
+        if not selected_nodes:
+            return
+
+        node = selected_nodes[0]
+
+        node_index = tools.get_node_index_in_group(node)
+
+        if node_index == -1:
+            return
+
+        if not up and tools.get_no_of_node_parent_children(node) == node_index + 1:
+            return
+
+        if up and node_index == 0:
+            return
+
+        tools.insert_node_at_parent_index(node, node_index - 1 if up else node_index + 2, True)
+
     def expand_doubleclicked_groups(self):
         selected_groups = tools.get_selected_groups()
 
@@ -496,14 +519,45 @@ class LayerTreeTools:
 
             group.setExpanded(True)
 
+    def _move_nodes_on_alt_key_pres_and_save_settings(self, state: bool):
+        self._move_nodes_on_alt_press(state)
+        # self.iface.layerTreeView().keyPressEvent = self.move_nodes_on_alt_key_press
+        snapshooter_dialog.CURRENT_SETTINGS['move_nodes_on_alt_key'] = state
+        snapshooter_dialog.write_settings()
+
     def _expand_selected_group_on_double_button_click_and_save_settings(self, state: bool):
         self._expand_selected_group_on_double_button_click(state)
         snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click'] = state
         snapshooter_dialog.write_settings()
 
+    def _move_nodes_on_alt_press(self, state: bool):
+        self.move_nodes_on_alt_key = not self.move_nodes_on_alt_key
+
+        # Get the meta-object of the instance
+        meta_object = self.iface.layerTreeView().metaObject()
+
+        # Iterate through the methods and filter out the signals
+        for i in range(meta_object.methodCount()):
+            method = meta_object.method(i)
+            if method.methodType() == QMetaMethod.Signal:
+                print(method.name().data().decode())
+
+        self.key_press_filter = KeyPressEventFilter()
+        self.iface.layerTreeView().installEventFilter(self.key_press_filter)
+
     def _expand_selected_group_on_double_button_click(self, state: bool):
         self.expanding_groups_on_doubleclick = not self.expanding_groups_on_doubleclick
         self.iface.layerTreeView().doubleClicked.connect(self.expand_doubleclicked_groups)
+
+    def _create_moving_nodes_on_alt_key_action(self, parent):
+        move_nodes_on_alt_key_action = QAction(
+            self.tr("Move nodes on Alt and arrow keys press"),
+            parent=parent,
+            checkable=True
+        )
+        move_nodes_on_alt_key_action.triggered.connect(self._move_nodes_on_alt_key_pres_and_save_settings)
+
+        return move_nodes_on_alt_key_action
 
     def _create_expanding_groups_with_doubleclick_action(self, parent):
         expand_groups_with_doubleclick_action = QAction(
@@ -554,6 +608,9 @@ class LayerTreeTools:
 
         expand_groups_with_doubleclick_action = self._create_expanding_groups_with_doubleclick_action(additional_actions_menu)
         additional_actions_menu.addAction(expand_groups_with_doubleclick_action)
+
+        move_nodes_on_alt_key_press_action = self._create_moving_nodes_on_alt_key_action(additional_actions_menu)
+        additional_actions_menu.addAction(move_nodes_on_alt_key_press_action)
 
         return additional_actions_menu
 
@@ -691,11 +748,31 @@ class LayerTreeTools:
         )
         self.layers_panel_actions.append(self.action_additional_actions)
 
+        self.action_move_nodes_up_action = QAction(
+            self.tr("Move node up"),
+            parent=self.iface.mainWindow()
+        )
+        self.action_move_nodes_up_action.triggered.connect(lambda: self.move_nodes_on_alt_key_press(up=True))
+        self.layers_panel_actions.append(self.action_move_nodes_up_action)
+
+        self.action_move_nodes_down_action = QAction(
+            self.tr("Move node down"),
+            parent=self.iface.mainWindow()
+        )
+        self.action_move_nodes_down_action.triggered.connect(lambda: self.move_nodes_on_alt_key_press(up=False))
+        self.layers_panel_actions.append(self.action_move_nodes_down_action)
+
         additional_actions_menu = self._get_additional_actions_menu()
         self.action_additional_actions.setMenu(additional_actions_menu)
         if snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click']:
             for qaction in additional_actions_menu.actions():
                 if qaction.text() == 'Expand groups with double click':
+                    qaction.trigger()
+                    break
+
+        if snapshooter_dialog.CURRENT_SETTINGS['move_nodes_on_alt_key']:
+            for qaction in additional_actions_menu.actions():
+                if qaction.text() == 'Move nodes on Alt and arrow keys press':
                     qaction.trigger()
                     break
 
@@ -724,10 +801,13 @@ class LayerTreeTools:
             self.iface.mainWindow()
         )
         additional_actions_menu = self._get_additional_actions_menu()
-        if snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click']:
-            for qaction in additional_actions_menu.actions():
-                if qaction.text() == 'Expand groups with double click':
-                    additional_actions_menu.removeAction(qaction)
+
+        for qaction in additional_actions_menu.actions():
+            if qaction.text() == 'Expand groups with double click':
+                additional_actions_menu.removeAction(qaction)
+
+            if qaction.text() == 'Move nodes on Alt and arrow keys press':
+                additional_actions_menu.removeAction(qaction)
 
         self.action_plugin_toolbar_additional_actions.setMenu(additional_actions_menu)
 
@@ -812,6 +892,9 @@ class LayerTreeTools:
         if self.expanding_groups_on_doubleclick:
             self.iface.layerTreeView().doubleClicked.disconnect(self.expand_doubleclicked_groups)
 
+        if self.key_press_filter is not None:
+            self.iface.layerTreeView().removeEventFilter(self.key_press_filter)
+
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.tr(u'&layer_tree_tools'),
@@ -856,3 +939,35 @@ class LayerTreeTools:
              # Do something useful here - delete the line containing pass and
              # substitute with your code.
         #    pass
+
+
+class KeyPressEventFilter(QObject):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            key_event = QKeyEvent(event)
+            if key_event.modifiers() == Qt.AltModifier and key_event.key() in [Qt.Key_Up, Qt.Key_Down]:
+                up = key_event.key() == Qt.Key_Up
+
+                selected_nodes = tools.get_selected_nodes()
+
+                if not selected_nodes:
+                    return False
+
+                node = selected_nodes[0]
+
+                node_index = tools.get_node_index_in_group(node)
+
+                if node_index == -1:
+                    return False
+
+                if not up and tools.get_no_of_node_parent_children(node) == node_index + 1:
+                    return False
+
+                if up and node_index == 0:
+                    return False
+
+                tools.insert_node_at_parent_index(node, node_index - 1 if up else node_index + 2, True)
+
+                return True
+
+        return False

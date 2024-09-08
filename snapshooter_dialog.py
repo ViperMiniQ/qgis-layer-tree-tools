@@ -44,7 +44,7 @@ SETTINGS_FILEPATH = os.path.join(os.path.dirname(__file__), 'settings.json')
 DEFAULT_SETTINGS = {
     "snapshots_directory": Path(os.path.join(os.path.dirname(__file__), 'Snapshots')).as_posix() + '/',
     "expand_group_double_click": False,
-    "expand_nodes_on_enter_press": False
+    "move_nodes_on_alt_key": False
 }
 CURRENT_SETTINGS = None
 

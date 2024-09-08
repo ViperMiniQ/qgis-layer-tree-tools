@@ -40,11 +40,30 @@ from PyQt5.QtCore import QVariant
 from PyQt5.QtXml import QDomDocument
 
 from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtCore import Qt, QItemSelectionModel
 
 from qgis.utils import iface
 from shutil import copyfile
 
 import re
+from osgeo import gdal
+
+GDAL_DRIVERS = {"raster": {}, "vector": {}}
+for i in range(gdal.GetDriverCount()):
+    driver = gdal.GetDriver(i)
+    driver_meta = driver.GetMetadata_Dict()
+
+    if 'DCAP_RASTER' in driver_meta:
+        GDAL_DRIVERS["raster"][driver.ShortName] = {
+            "long_name": driver.LongName,
+            "extensions": driver.GetMetadataItem(gdal.DMD_EXTENSIONS)
+        }
+
+    if 'DCAP_VECTOR' in driver_meta:
+        GDAL_DRIVERS["vector"][driver.ShortName] = {
+            "long_name": driver.LongName,
+            "extensions": driver.GetMetadataItem(gdal.DMD_EXTENSIONS)
+        }
 
 
 def get_layers() -> Dict[str, QgsMapLayer]:
@@ -699,18 +718,22 @@ def vacuum_database_connection(connection):  # QgsAbstractDatabaseProviderConnec
     connection.vacuum(None, None)
 
 
-def vacuum_layer_database(layer: QgsMapLayer):
+def vacuum_layer_database(layer: QgsMapLayer) -> int:
     if not qgs_abstract_database_provider_connection:
-        return
+        return -1
 
     if not (is_layer_a_vector_layer(layer) or is_layer_a_raster(layer)):
-        return
+        return -1
 
     if not check_layer_has_database_connection(layer):
-        return
+        return -1
 
-    connection = get_layer_database_connection(layer)
-    vacuum_database_connection(connection)
+    try:
+        connection = get_layer_database_connection(layer)
+        vacuum_database_connection(connection)
+        return 1
+    except Exception:
+        return 0
 
 
 def is_layer_an_annotation_layer(layer: QgsMapLayer) -> bool:
@@ -719,3 +742,44 @@ def is_layer_an_annotation_layer(layer: QgsMapLayer) -> bool:
 
     return isinstance(layer, QgsAnnotationLayer)
 
+
+def select_node(node: QgsLayerTreeNode):
+    if isinstance(node, QgsLayerTreeLayer):
+        iface.layerTreeView().setCurrentLayer(node.layer())
+
+    # https://gis.stackexchange.com/questions/293528/programmatically-select-a-group-node-using-pyqgis/383321#383321
+    if isinstance(node, QgsLayerTreeGroup):
+        view = iface.layerTreeView()
+        m = view.model()
+
+        listIndexes = m.match(m.index(0, 0), Qt.DisplayRole, node.name(), Qt.MatchFixedString)
+
+        if listIndexes:
+            view.selectionModel().setCurrentIndex(listIndexes[0], QItemSelectionModel.ClearAndSelect)
+
+
+def insert_node_at_parent_index(node: QgsLayerTreeNode, index_: int,
+                                delete_original: bool = False, set_selected: bool = True):
+    parent = node.parent()
+    cloned = node.clone()
+    parent.insertChildNode(index_, cloned)
+
+    if delete_original:
+        delete_node(node)
+
+    if set_selected:
+        select_node(cloned)
+
+
+def get_node_index_in_group(node: QgsLayerTreeNode):
+    if not isinstance(node, QgsLayerTreeNode):
+        return -1
+
+    return node.parent().children().index(node)
+
+
+def get_no_of_node_parent_children(node: QgsLayerTreeNode):
+    if not isinstance(node, QgsLayerTreeNode):
+        return -1
+
+    return len(node.parent().children())
