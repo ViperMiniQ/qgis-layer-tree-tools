@@ -5,8 +5,13 @@
 ### NEW
 - additional action to vacuum the database connection for layers
 - additional action to convert Annotation layer to a regular vector layer
+- status messages are now displayed in the status bar and log panel 
+- moving layer tree nodes up and down on Alt + arrow up/down
+- moving layer tree nodes up and down on button press in the Layers Panel toolbar
 ### CHANGED
-- when commiting changes, only QgsVectorLayer objects are taken into account
+- additional action commit changes now only works on vector layers
+### FIXED
+- configuration files are automatically rebuilt if missing or corrupted
 &nbsp;
 ## 1.3.0
 &nbsp;

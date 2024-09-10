@@ -687,8 +687,14 @@ Alongside shortcuts for Sorting and grouping and Snapshost, additional actions a
     - memory layers are ignored
     - copies can have original file names, or they can be renamed to the layer name
     - only characters allowed in file names when applying layer name are: [space, a-z, A-Z, 0-9, _] - if a layer name contains a character not allowed in file name, it is replaced with an underscore
+  + Vacuum database
+    - optimizes the database by removing deleted features and compacting the database file
+  + Convert selected annotation layer
+    - converts annotation layer to regular vector layers (point, line, polygon)
   + Expand groups with double click
     - expands all groups in the layer tree on double click
+  + Move nodes on Alt and arrow key press
+    - moves selected node up or down in the layer tree
 <!-- -->
 &nbsp;  
 Each of the actions can be done on:
