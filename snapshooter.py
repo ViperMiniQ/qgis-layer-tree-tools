@@ -18,18 +18,11 @@ from qgis.core import (
     QgsMapLayer,
     QgsVectorLayer,
     QgsFeatureRequest,
-    QgsTask
+    QgsTask,
+    Qgis
 )
 
-
-# class Snapshot(TypedDict):
-#     at_time: datetime.datetime
-#     name: str
-#     include_rasters: bool
-#     include_vector_layers: bool
-#     vector_layers_in_memory: bool
-#     tree: dict
-#     id: int
+from qgis.utils import iface
 
 
 class Snapshooter(QgsTask):
@@ -87,6 +80,10 @@ class Snapshooter(QgsTask):
             if self.callback_func is not None:
                 self.callback_func({})
 
+                self.task_done = True
+
+            return
+
         current_time = datetime.datetime.now()
 
         snapshot_id = self._generate_snapshot_id(current_time)
@@ -110,6 +107,7 @@ class Snapshooter(QgsTask):
             self.callback_func(snapshot_details)
 
         self.task_done = True
+
 
     @classmethod
     def get_all_snapshots_details(cls):

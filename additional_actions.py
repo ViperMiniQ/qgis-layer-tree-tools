@@ -16,7 +16,8 @@ from qgis.core import (
     QgsApplication,
     QgsTask,
     Qgis,
-    QgsGeometry
+    QgsGeometry,
+    QgsMessageLog,
 )
 from qgis.utils import iface
 from . import tools
@@ -37,19 +38,38 @@ def reload_layers_in_group(group: QgsLayerTreeGroup):
         if tools.is_node_a_layer(node):
             tools.reload_layer(node)
 
+            QgsMessageLog.logMessage(
+                f"Layer {node.layer().name()} reloaded",
+                "Layer Tree Tools",
+                Qgis.Info
+            )
+
 
 def commit_changes_to_layers_in_group(group: QgsLayerTreeGroup):
     for node in group.children():
         if not tools.is_node_a_layer(node):
             continue
         layer = node.layer()
+
         tools.commit_changes_to_layer(layer)
+
+        QgsMessageLog.logMessage(
+            f"Changes committed to layer {layer.name()}",
+            "Layer Tree Tools",
+            Qgis.Info
+        )
 
 
 def truncate_selected_layers():
     for layer in tools.get_selected_layers():
         if tools.is_layer_a_vector_layer(layer):
             tools.truncate_layer(layer)
+
+            QgsMessageLog.logMessage(
+                f"Layer {layer.name()} truncated",
+                "Layer Tree Tools",
+                Qgis.Info
+            )
 
 
 def truncate_all_layers_in_group(group: QgsLayerTreeGroup):
@@ -189,13 +209,40 @@ class FileCopier(QgsTask):
         return self.check
 
     def finished(self, result):
-        pass
+        if result:
+            iface.messageBar().pushMessage(
+                "Layer Tree Tools",
+                "Layer files successfully copied to new directory",
+                Qgis.Success
+            )
+            return
+        iface.messageBar().pushMessage(
+            "Layer Tree Tools",
+            "Failed to copy layer files to new directory",
+            Qgis.Critical
+        )
 
 
 def vacuum_selected_layers():
     for layer in tools.get_selected_layers():
-        tools.vacuum_layer_database(layer)
+        result = tools.vacuum_layer_database(layer)
 
+        if result == 1:
+            QgsMessageLog.logMessage(
+                f"Database vacuumed for layer {layer.name()}",
+                "Layer Tree Tools",
+                Qgis.Info
+            )
+            return
+
+        if result == 0:
+            QgsMessageLog.logMessage(
+                f"Database vacuum failed for layer {layer.name()}",
+                "Layer Tree Tools",
+                Qgis.Critical
+            )
+            return
+        
 
 def vacuum_all_layers_in_group(group: QgsLayerTreeGroup):
     for node in group.children():
