@@ -783,3 +783,27 @@ def get_no_of_node_parent_children(node: QgsLayerTreeNode):
         return -1
 
     return len(node.parent().children())
+
+
+def move_node_up_down_in_group(up: bool = False) -> bool:
+    selected_nodes = get_selected_nodes()
+
+    if not selected_nodes:
+        return False
+
+    node = selected_nodes[0]
+
+    node_index = get_node_index_in_group(node)
+
+    if node_index == -1:
+        return False
+
+    if not up and get_no_of_node_parent_children(node) == node_index + 1:
+        return False
+
+    if up and node_index == 0:
+        return False
+
+    insert_node_at_parent_index(node, node_index - 1 if up else node_index + 2, True)
+
+    return True

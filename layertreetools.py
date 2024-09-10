@@ -690,10 +690,11 @@ class LayerTreeTools:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        sort_icon_path = self.plugin_dir + '/sort_icon.png'
-        snapshot_icon_path = self.plugin_dir + '/snapshot_icon.png'
-        additional_actions_icon_path = self.plugin_dir + '/additional_actions_icon.png'
-
+        sort_icon_path = os.path.join(self.plugin_dir, 'icons/sort_icon.png')
+        snapshot_icon_path = os.path.join(self.plugin_dir, 'icons/snapshot_icon.png')
+        additional_actions_icon_path = os.path.join(self.plugin_dir, 'icons/additional_actions_icon.png')
+        move_up_icon_path = os.path.join(self.plugin_dir, 'icons/arrow_up.png')
+        move_down_icon_path = os.path.join(self.plugin_dir, 'icons/arrow_down.png')
         # layers panel
 
         self.action_sorter_layers_panel = QAction(
@@ -720,17 +721,19 @@ class LayerTreeTools:
         self.layers_panel_actions.append(self.action_additional_actions)
 
         self.action_move_nodes_up_action = QAction(
+            QIcon(move_up_icon_path),
             self.tr("Move node up"),
             parent=self.iface.mainWindow()
         )
-        self.action_move_nodes_up_action.triggered.connect(lambda: self.move_nodes_on_alt_key_press(up=True))
+        self.action_move_nodes_up_action.triggered.connect(lambda: tools.move_node_up_down_in_group(up=True))
         self.layers_panel_actions.append(self.action_move_nodes_up_action)
 
         self.action_move_nodes_down_action = QAction(
+            QIcon(move_down_icon_path),
             self.tr("Move node down"),
             parent=self.iface.mainWindow()
         )
-        self.action_move_nodes_down_action.triggered.connect(lambda: self.move_nodes_on_alt_key_press(up=False))
+        self.action_move_nodes_down_action.triggered.connect(lambda: tools.move_node_up_down_in_group(up=False))
         self.layers_panel_actions.append(self.action_move_nodes_down_action)
 
         additional_actions_menu = self._get_additional_actions_menu()
@@ -919,26 +922,6 @@ class KeyPressEventFilter(QObject):
             if key_event.modifiers() == Qt.AltModifier and key_event.key() in [Qt.Key_Up, Qt.Key_Down]:
                 up = key_event.key() == Qt.Key_Up
 
-                selected_nodes = tools.get_selected_nodes()
-
-                if not selected_nodes:
-                    return False
-
-                node = selected_nodes[0]
-
-                node_index = tools.get_node_index_in_group(node)
-
-                if node_index == -1:
-                    return False
-
-                if not up and tools.get_no_of_node_parent_children(node) == node_index + 1:
-                    return False
-
-                if up and node_index == 0:
-                    return False
-
-                tools.insert_node_at_parent_index(node, node_index - 1 if up else node_index + 2, True)
-
-                return True
+                return tools.move_node_up_down_in_group(up)
 
         return False
