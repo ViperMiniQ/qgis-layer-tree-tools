@@ -24,8 +24,8 @@ from qgis.core import (
 from typing import Dict
 import datetime
 
-from PyQt5.QtGui import QStandardItemModel
-from PyQt5.QtCore import Qt
+from qgis.PyQt.QtGui import QStandardItemModel
+from qgis.PyQt.QtCore import Qt
 
 from . import snapshot_name_dialog
 from .snapshotreporter import SnapshotReporter
@@ -176,12 +176,12 @@ class snapshooterDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def _get_treeview_model(self, parent) -> QStandardItemModel:
         model = QStandardItemModel(0, len(self.TREEVIEW_ITEMS), parent)
-        model.setHeaderData(self.TREEVIEW_ITEMS['ID'], Qt.Horizontal, "ID")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Name'], Qt.Horizontal, "Name")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Time'], Qt.Horizontal, "Time")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Rasters'], Qt.Horizontal, "Rasters")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Vector layers'], Qt.Horizontal, "Vector layers")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Vector layers in memory'], Qt.Horizontal, "Vector layers in memory")
+        model.setHeaderData(self.TREEVIEW_ITEMS['ID'], Qt.Orientation.Horizontal, "ID")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Name'], Qt.Orientation.Horizontal, "Name")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Time'], Qt.Orientation.Horizontal, "Time")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Rasters'], Qt.Orientation.Horizontal, "Rasters")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Vector layers'], Qt.Orientation.Horizontal, "Vector layers")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Vector layers in memory'], Qt.Orientation.Horizontal, "Vector layers in memory")
 
         return model
 

@@ -36,8 +36,8 @@ try:
 except ImportError:
     qgs_annotation_layer = False
 
-from PyQt5.QtCore import QVariant
-from PyQt5.QtXml import QDomDocument
+from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtXml import QDomDocument
 
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.PyQt.QtCore import Qt, QItemSelectionModel

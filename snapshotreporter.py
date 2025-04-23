@@ -6,8 +6,8 @@ from qgis.PyQt import QtWidgets
 
 from typing import Dict, List
 
-from PyQt5.QtGui import QStandardItemModel
-from PyQt5.QtCore import Qt
+from qgis.PyQt.QtGui import QStandardItemModel
+from qgis.PyQt.QtCore import Qt
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -44,8 +44,8 @@ class SnapshotReporter(QtWidgets.QDialog, FORM_CLASS):
 
     def _get_treeview_model(self, parent) -> QStandardItemModel:
         model = QStandardItemModel(0, len(self.TREEVIEW_ITEMS), parent)
-        model.setHeaderData(self.TREEVIEW_ITEMS['Name'], Qt.Horizontal, "Name")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Provider'], Qt.Horizontal, "Provider")
-        model.setHeaderData(self.TREEVIEW_ITEMS['Datasource'], Qt.Horizontal, "Datasource")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Name'], Qt.Orientation.Horizontal, "Name")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Provider'], Qt.Orientation.Horizontal, "Provider")
+        model.setHeaderData(self.TREEVIEW_ITEMS['Datasource'], Qt.Orientation.Horizontal, "Datasource")
 
         return model

@@ -41,7 +41,7 @@ def reload_layers_in_group(group: QgsLayerTreeGroup):
             QgsMessageLog.logMessage(
                 f"Layer {node.layer().name()} reloaded",
                 "Layer Tree Tools",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
 
 
@@ -56,7 +56,7 @@ def commit_changes_to_layers_in_group(group: QgsLayerTreeGroup):
         QgsMessageLog.logMessage(
             f"Changes committed to layer {layer.name()}",
             "Layer Tree Tools",
-            Qgis.Info
+            Qgis.MessageLevel.Info
         )
 
 
@@ -68,7 +68,7 @@ def truncate_selected_layers():
             QgsMessageLog.logMessage(
                 f"Layer {layer.name()} truncated",
                 "Layer Tree Tools",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
 
 
@@ -213,13 +213,13 @@ class FileCopier(QgsTask):
             iface.messageBar().pushMessage(
                 "Layer Tree Tools",
                 "Layer files successfully copied to new directory",
-                Qgis.Success
+                Qgis.MessageLevel.Success
             )
             return
         iface.messageBar().pushMessage(
             "Layer Tree Tools",
             "Failed to copy layer files to new directory",
-            Qgis.Critical
+            Qgis.MessageLevel.Critical
         )
 
 
@@ -231,7 +231,7 @@ def vacuum_selected_layers():
             QgsMessageLog.logMessage(
                 f"Database vacuumed for layer {layer.name()}",
                 "Layer Tree Tools",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
             return
 
@@ -239,7 +239,7 @@ def vacuum_selected_layers():
             QgsMessageLog.logMessage(
                 f"Database vacuum failed for layer {layer.name()}",
                 "Layer Tree Tools",
-                Qgis.Critical
+                Qgis.MessageLevel.Critical
             )
             return
         
@@ -315,5 +315,5 @@ def convert_selected_annotation_layer_to_memory_layers():
     iface.messageBar().pushMessage(
         "Layer Tree Tools",
         "Annotation layer successfully converted to memory layers",
-        Qgis.Success
+        Qgis.MessageLevel.Success
     )

@@ -84,7 +84,7 @@ class LayerTreeTools:
 
         self.toolbutton = QToolButton()
         self.toolbutton.setMenu(QMenu())
-        self.toolbutton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolbutton.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
         self.toolbutton_action = self.iface.addToolBarWidget(self.toolbutton)
 
         # Check if plugin was started the first time in current QGIS session
@@ -300,7 +300,7 @@ class LayerTreeTools:
         destination_directory = QFileDialog.getExistingDirectory(
             self.iface.mainWindow(),
             self.tr("Select starting directory to export layers to"),
-            options=QFileDialog.ShowDirsOnly
+            options=QFileDialog.Option.ShowDirsOnly
         )
 
         if not destination_directory or destination_directory == '/':
@@ -594,7 +594,7 @@ class LayerTreeTools:
         destination_directory = QFileDialog.getExistingDirectory(
             self.iface.mainWindow(),
             self.tr("Select directory to export layers to"),
-            options=QFileDialog.ShowDirsOnly
+            options=QFileDialog.Option.ShowDirsOnly
         )
 
         res = tools.ask_question(
@@ -614,7 +614,7 @@ class LayerTreeTools:
         destination_directory = QFileDialog.getExistingDirectory(
             self.iface.mainWindow(),
             self.tr("Select directory to export layers to"),
-            options=QFileDialog.ShowDirsOnly
+            options=QFileDialog.Option.ShowDirsOnly
         )
 
         if not destination_directory or destination_directory == '/':
@@ -636,7 +636,7 @@ class LayerTreeTools:
         destination_directory = QFileDialog.getExistingDirectory(
             self.iface.mainWindow(),
             self.tr("Select directory to export layers to"),
-            options=QFileDialog.ShowDirsOnly
+            options=QFileDialog.Option.ShowDirsOnly
         )
 
         if not destination_directory or destination_directory == '/':
@@ -894,7 +894,7 @@ class LayerTreeTools:
             # show the dialog
         self.dlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.dlg.exec()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
@@ -906,7 +906,7 @@ class LayerTreeTools:
         # show the dialog
         dlg.show()
         # Run the dialog event loop
-        dlg.exec_()
+        dlg.exec()
         # See if OK was pressed
         if dlg.result():
             pass
@@ -917,10 +917,10 @@ class LayerTreeTools:
 
 class KeyPressEventFilter(QObject):
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress:
+        if event.type() == QEvent.Type.KeyPress:
             key_event = QKeyEvent(event)
-            if key_event.modifiers() == Qt.AltModifier and key_event.key() in [Qt.Key_Up, Qt.Key_Down]:
-                up = key_event.key() == Qt.Key_Up
+            if key_event.modifiers() == Qt.KeyboardModifier.AltModifier and key_event.key() in [Qt.Key.Key_Up, Qt.Key.Key_Down]:
+                up = key_event.key() == Qt.Key.Key_Up
 
                 return tools.move_node_up_down_in_group(up)
 
