@@ -36,11 +36,17 @@ try:
 except ImportError:
     qgs_annotation_layer = False
 
+try:
+    from qgis.core import QgsPointCloudLayer  # Added in version 3.18.
+    qgs_point_cloud_layer = True
+except ImportError:
+    qgs_point_cloud_layer = False
+
 from qgis.PyQt.QtCore import QVariant
 from qgis.PyQt.QtXml import QDomDocument
 
 from qgis.PyQt.QtWidgets import QMessageBox
-from qgis.PyQt.QtCore import Qt, QItemSelectionModel
+from qgis.PyQt.QtCore import Qt
 
 from qgis.utils import iface
 from shutil import copyfile
@@ -83,6 +89,8 @@ def get_project_storage_types() -> List[str]:
     layers = get_layers()
     for layer in layers.values():
         if isinstance(layer, QgsRasterLayer):
+            continue
+        if not isinstance(layer, QgsVectorLayer):
             continue
         if layer.storageType() not in storage_types:
             storage_types.append(layer.storageType())
@@ -128,6 +136,8 @@ def get_layer_storage_type(layer: QgsVectorLayer) -> str:
 def get_layer_geometry(layer: QgsVectorLayer) -> int:
     if is_layer_a_raster(layer):
         return definitions.QGS_RASTER_LAYER_GEOMETRY_TYPE
+    if is_layer_a_point_cloud(layer):
+        return definitions.QGS_POINT_CLOUD_LAYER_GEOMETRY_TYPE
     return layer.geometryType()
 
 
@@ -212,7 +222,7 @@ def get_storage_types() -> List[str]:
     layers = get_layers()
 
     for layer in layers.values():
-        if is_node_a_raster(layer):
+        if not isinstance(layer, QgsVectorLayer):
             continue
 
         if layer.storageType() not in storage_types:
@@ -267,6 +277,12 @@ def is_layer_a_vector_layer(layer: QgsLayerTreeLayer) -> bool:
 
 def is_layer_a_raster(layer: QgsLayerTreeLayer) -> bool:
     return isinstance(layer, QgsRasterLayer)
+
+
+def is_layer_a_point_cloud(layer) -> bool:
+    if not qgs_point_cloud_layer:
+        return False
+    return isinstance(layer, QgsPointCloudLayer)
 
 
 def get_node_filepath(node: QgsLayerTreeNode) -> str:
@@ -445,7 +461,7 @@ def show_dialog_error_message(text: str):
     error_dialog = QMessageBox()
     error_dialog.setText(str(text))
     error_dialog.setWindowTitle('Error')
-    error_dialog.setStandardButtons(QMessageBox.Ok)
+    error_dialog.setStandardButtons(QMessageBox.StandardButton.Ok)
     error_dialog.exec()
 
 
@@ -453,10 +469,10 @@ def show_yes_no_message(text: str) -> bool:
     """True if yes was pressed"""
     message = QMessageBox()
     message.setText(str(text))
-    message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    message.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
     message.exec()
 
-    return message.standardButton(message.clickedButton()) == QMessageBox.Yes
+    return message.standardButton(message.clickedButton()) == QMessageBox.StandardButton.Yes
 
 
 def get_named_style_as_qdom(layer: QgsMapLayer) -> QDomDocument:
@@ -596,15 +612,15 @@ def ask_question(title: str, text: str, left_button_text: str, right_button_text
     returns True if left button was pressed, False if right button was pressed, None if dialog was closed
     """
     box = QMessageBox()
-    box.setIcon(QMessageBox.Question)
+    box.setIcon(QMessageBox.Icon.Question)
     box.setWindowTitle(title)
     box.setText(text)
-    box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-    buttonY = box.button(QMessageBox.Yes)
+    box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+    buttonY = box.button(QMessageBox.StandardButton.Yes)
     buttonY.setText(left_button_text)
-    buttonN = box.button(QMessageBox.No)
+    buttonN = box.button(QMessageBox.StandardButton.No)
     buttonN.setText(right_button_text)
-    box.exec_()
+    box.exec()
 
     if box.clickedButton() == buttonY:
         return True
@@ -744,18 +760,7 @@ def is_layer_an_annotation_layer(layer: QgsMapLayer) -> bool:
 
 
 def select_node(node: QgsLayerTreeNode):
-    if isinstance(node, QgsLayerTreeLayer):
-        iface.layerTreeView().setCurrentLayer(node.layer())
-
-    # https://gis.stackexchange.com/questions/293528/programmatically-select-a-group-node-using-pyqgis/383321#383321
-    if isinstance(node, QgsLayerTreeGroup):
-        view = iface.layerTreeView()
-        m = view.model()
-
-        listIndexes = m.match(m.index(0, 0), Qt.DisplayRole, node.name(), Qt.MatchFixedString)
-
-        if listIndexes:
-            view.selectionModel().setCurrentIndex(listIndexes[0], QItemSelectionModel.ClearAndSelect)
+    iface.layerTreeView().setCurrentNode(node)
 
 
 def insert_node_at_parent_index(node: QgsLayerTreeNode, index_: int,

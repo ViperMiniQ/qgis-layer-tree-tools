@@ -36,10 +36,6 @@ def get_geometry_node_order_within_group(group: QgsLayerTreeGroup, geometry_orde
         if isinstance(node, QgsLayerTreeLayer):
             layer = node.layer()
 
-            if tools.is_layer_a_raster(layer):
-                geometries[definitions.QGS_RASTER_LAYER_GEOMETRY_TYPE].append(node)
-                continue
-
             layer_geometry = tools.get_layer_geometry(layer)
 
             if layer_geometry not in geometries:
@@ -234,7 +230,7 @@ def get_node_order_by_last_modified(group: QgsLayerTreeGroup, reverse: bool = Fa
     sorted_nodes = sorted(nodes, key=lambda x: tools.get_file_last_modified(tools.get_node_filepath(x)), 
                           reverse=reverse)
     
-    sorted_nodes += no_timestamp_nodes  # + groups
+    sorted_nodes += no_timestamp_nodes + groups
 
     return sorted_nodes
 
@@ -263,7 +259,7 @@ def get_node_order_by_size_on_disk(group: QgsLayerTreeGroup, reverse: bool = Fal
     sorted_nodes = sorted(nodes, key=lambda x: tools.get_file_size_on_disk(tools.get_node_filepath(x)),
                           reverse=reverse)
 
-    sorted_nodes += no_size_nodes  # + groups
+    sorted_nodes += no_size_nodes + groups
 
     return sorted_nodes
 
@@ -286,7 +282,7 @@ def get_node_order_by_encoding(group: QgsLayerTreeGroup, encoding_order: List[st
         if isinstance(node, QgsLayerTreeLayer):
             layer = node.layer()
 
-            if tools.is_layer_a_raster(layer):
+            if not tools.is_layer_a_vector_layer(layer):
                 continue
 
             encoding = tools.get_layer_encoding(layer)
@@ -304,7 +300,7 @@ def get_node_order_by_encoding(group: QgsLayerTreeGroup, encoding_order: List[st
     for encoding in encoding_order:
         sorted_nodes += file_encodings[encoding]
 
-    sorted_nodes += unknown
+    sorted_nodes += unknown + groups
 
     return sorted_nodes
 

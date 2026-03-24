@@ -5,7 +5,8 @@
 
 [general]
 name=Layer Tree Tools
-qgisMinimumVersion=3.0
+qgisMinimumVersion=4.0
+qgisMaximumVersion=4.99
 description=Sorts and groups nodes in layer tree, takes layer tree snapshots
 version=1.4.0
 author=Viper MiniQ

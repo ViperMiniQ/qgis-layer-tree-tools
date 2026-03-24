@@ -65,17 +65,6 @@ class LayerTreeTools:
         self.iface = iface
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'LayerTreeTools_{}.qm'.format(locale))
-
-        if os.path.exists(locale_path):
-            self.translator = QTranslator()
-            self.translator.load(locale_path)
-            QCoreApplication.installTranslator(self.translator)
 
         # Declare instance attributes
         self.actions = []
@@ -83,7 +72,8 @@ class LayerTreeTools:
         self.menu = self.tr(u'&layer_tree_tools')
 
         self.toolbutton = QToolButton()
-        self.toolbutton.setMenu(QMenu())
+        self.toolbutton_menu = QMenu(self.iface.mainWindow())
+        self.toolbutton.setMenu(self.toolbutton_menu)
         self.toolbutton.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
         self.toolbutton_action = self.iface.addToolBarWidget(self.toolbutton)
 
@@ -185,7 +175,7 @@ class LayerTreeTools:
         return action
 
     def _create_truncate_action(self, parent):
-        truncate_menu = QMenu()
+        truncate_menu = QMenu(parent)
 
         truncate_all_layers = QAction(
             self.tr("Delete features in all layers"),
@@ -221,7 +211,7 @@ class LayerTreeTools:
         return truncate_action
 
     def _export_layers_to_dir_action(self, parent):
-        export_layers_to_dir_menu = QMenu()
+        export_layers_to_dir_menu = QMenu(parent)
 
         export_layers_to_dir_all_layers = QAction(
             self.tr("Copy all layers files to directory"),
@@ -255,7 +245,7 @@ class LayerTreeTools:
             parent=export_layers_to_dir_menu
         )
 
-        copy_layers_in_order_making_a_tree_dict_menu = QMenu()
+        copy_layers_in_order_making_a_tree_dict_menu = QMenu(export_layers_to_dir_menu)
         copy_layers_in_order_making_a_tree_dict_starting_from_root = QAction(
             self.tr("Start from root"),
             parent=copy_layers_in_order_making_a_tree_dict_menu
@@ -319,7 +309,7 @@ class LayerTreeTools:
         additional_actions.copy_layer_files_making_a_dir_tree(selected_groups[0], destination_directory, res)
 
     def _create_vacuum_database_action(self, parent):
-        vacuum_database_menu = QMenu()
+        vacuum_database_menu = QMenu(parent)
 
         vacuum_database_all_layers = QAction(
             self.tr("Vacuum all layers"),
@@ -351,7 +341,7 @@ class LayerTreeTools:
         return vacuum_database_action
 
     def _create_feature_count_action(self, parent):
-        toggle_feature_count_menu = QMenu()
+        toggle_feature_count_menu = QMenu(parent)
 
         toggle_feature_count_all_layers_on = QAction(
             self.tr("Toggle feature count ON (all layers)"),
@@ -414,7 +404,7 @@ class LayerTreeTools:
         return toggle_feature_count_action
 
     def _create_commit_changes_action(self, parent):
-        commit_changes_menu = QMenu()
+        commit_changes_menu = QMenu(parent)
 
         commit_changes_all_layers = QAction(
             self.tr("Commit changes (all layers)"),
@@ -451,7 +441,7 @@ class LayerTreeTools:
         return commit_changes_action
 
     def _create_reload_action(self, parent):
-        reload_layers_menu = QMenu()
+        reload_layers_menu = QMenu(parent)
 
         reload_selected_layers = QAction(
             self.tr("Reload selected layers"),
@@ -552,7 +542,7 @@ class LayerTreeTools:
         return convert_selected_annotation_layer
 
     def _get_additional_actions_menu(self):
-        additional_actions_menu = QMenu()
+        additional_actions_menu = QMenu(self.iface.mainWindow())
 
         additional_actions_menu.addAction(self._create_feature_count_action(additional_actions_menu))
         additional_actions_menu.addSeparator()
@@ -697,6 +687,8 @@ class LayerTreeTools:
         move_down_icon_path = os.path.join(self.plugin_dir, 'icons/arrow_down.png')
         # layers panel
 
+        layers_panel_toolbar = self._get_layers_panel_toolbar()
+
         self.action_sorter_layers_panel = QAction(
             QIcon(sort_icon_path),
             self.tr("Sort and group"),
@@ -704,6 +696,8 @@ class LayerTreeTools:
         )
         self.action_sorter_layers_panel.triggered.connect(self.run)
         self.layers_panel_actions.append(self.action_sorter_layers_panel)
+
+        layers_panel_toolbar.addAction(self.action_sorter_layers_panel)
 
         self.action_snapshots_layers_panel = QAction(
             QIcon(snapshot_icon_path),
@@ -713,12 +707,23 @@ class LayerTreeTools:
         self.action_snapshots_layers_panel.triggered.connect(self.run_snapshooter)
         self.layers_panel_actions.append(self.action_snapshots_layers_panel)
 
-        self.action_additional_actions = QAction(
-            QIcon(additional_actions_icon_path),
-            self.tr("Additionals actions"),
-            parent=self.iface.mainWindow(),
+        layers_panel_toolbar.addAction(self.action_snapshots_layers_panel)
+
+        self.toolbutton_additional_actions = QToolButton(
+            parent=self.iface.mainWindow()
         )
-        self.layers_panel_actions.append(self.action_additional_actions)
+        self.toolbutton_additional_actions.setIcon(QIcon(additional_actions_icon_path))
+        self.toolbutton_additional_actions.setAutoRaise(True)
+        self.toolbutton_additional_actions.setToolTip(self.tr("Additional actions"))
+        self.toolbutton_additional_actions.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.layers_panel_additional_actions_menu = self._get_additional_actions_menu()
+        self.toolbutton_additional_actions.setMenu(self.layers_panel_additional_actions_menu)
+
+        self.layers_panel_actions.append(
+            layers_panel_toolbar.addWidget(
+                self.toolbutton_additional_actions
+            )
+        )
 
         self.action_move_nodes_up_action = QAction(
             QIcon(move_up_icon_path),
@@ -728,6 +733,8 @@ class LayerTreeTools:
         self.action_move_nodes_up_action.triggered.connect(lambda: tools.move_node_up_down_in_group(up=True))
         self.layers_panel_actions.append(self.action_move_nodes_up_action)
 
+        layers_panel_toolbar.addAction(self.action_move_nodes_up_action)
+
         self.action_move_nodes_down_action = QAction(
             QIcon(move_down_icon_path),
             self.tr("Move node down"),
@@ -736,25 +743,19 @@ class LayerTreeTools:
         self.action_move_nodes_down_action.triggered.connect(lambda: tools.move_node_up_down_in_group(up=False))
         self.layers_panel_actions.append(self.action_move_nodes_down_action)
 
-        additional_actions_menu = self._get_additional_actions_menu()
-        self.action_additional_actions.setMenu(additional_actions_menu)
+        layers_panel_toolbar.addAction(self.action_move_nodes_down_action)
+
         if snapshooter_dialog.CURRENT_SETTINGS['expand_group_double_click']:
-            for qaction in additional_actions_menu.actions():
+            for qaction in self.toolbutton_additional_actions.menu().actions():
                 if qaction.text() == 'Expand groups with double click':
                     qaction.trigger()
                     break
 
         if snapshooter_dialog.CURRENT_SETTINGS['move_nodes_on_alt_key']:
-            for qaction in additional_actions_menu.actions():
+            for qaction in self.toolbutton_additional_actions.menu().actions():
                 if qaction.text() == 'Move nodes on Alt and arrow keys press':
                     qaction.trigger()
                     break
-
-        layers_panel_toolbar = self._get_layers_panel_toolbar()
-
-        if layers_panel_toolbar:
-            for action in self.layers_panel_actions:
-                layers_panel_toolbar.addAction(action)
 
         # /layers panel
 
@@ -774,7 +775,8 @@ class LayerTreeTools:
             self.tr('Additional actions'),
             self.iface.mainWindow()
         )
-        additional_actions_menu = self._get_additional_actions_menu()
+        self.plugin_toolbar_additional_actions_menu = self._get_additional_actions_menu()
+        additional_actions_menu = self.plugin_toolbar_additional_actions_menu
 
         for qaction in additional_actions_menu.actions():
             if qaction.text() == 'Expand groups with double click':
@@ -918,9 +920,8 @@ class LayerTreeTools:
 class KeyPressEventFilter(QObject):
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
-            key_event = QKeyEvent(event)
-            if key_event.modifiers() == Qt.KeyboardModifier.AltModifier and key_event.key() in [Qt.Key.Key_Up, Qt.Key.Key_Down]:
-                up = key_event.key() == Qt.Key.Key_Up
+            if event.modifiers() == Qt.KeyboardModifier.AltModifier and event.key() in [Qt.Key.Key_Up, Qt.Key.Key_Down]:
+                up = event.key() == Qt.Key.Key_Up
 
                 return tools.move_node_up_down_in_group(up)
 
