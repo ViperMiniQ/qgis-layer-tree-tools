@@ -230,7 +230,7 @@ def get_node_order_by_last_modified(group: QgsLayerTreeGroup, reverse: bool = Fa
     sorted_nodes = sorted(nodes, key=lambda x: tools.get_file_last_modified(tools.get_node_filepath(x)), 
                           reverse=reverse)
     
-    sorted_nodes += no_timestamp_nodes + groups
+    sorted_nodes += no_timestamp_nodes
 
     return sorted_nodes
 
@@ -259,7 +259,7 @@ def get_node_order_by_size_on_disk(group: QgsLayerTreeGroup, reverse: bool = Fal
     sorted_nodes = sorted(nodes, key=lambda x: tools.get_file_size_on_disk(tools.get_node_filepath(x)),
                           reverse=reverse)
 
-    sorted_nodes += no_size_nodes + groups
+    sorted_nodes += no_size_nodes
 
     return sorted_nodes
 
@@ -300,7 +300,7 @@ def get_node_order_by_encoding(group: QgsLayerTreeGroup, encoding_order: List[st
     for encoding in encoding_order:
         sorted_nodes += file_encodings[encoding]
 
-    sorted_nodes += unknown + groups
+    sorted_nodes += unknown
 
     return sorted_nodes
 
@@ -328,7 +328,7 @@ def get_node_order_by_directory(group: QgsLayerTreeGroup, reverse: bool = False)
 
     sorted_nodes = sorted(nodes, key=lambda x: tools.get_node_directory(x), reverse=reverse)
 
-    sorted_nodes += no_directory_nodes + groups
+    sorted_nodes += no_directory_nodes
 
     return sorted_nodes
 
@@ -367,6 +367,6 @@ def get_node_order_by_crs(group: QgsLayerTreeGroup, method: str, crs_order: List
     for crs_ in crs_order:
         sorted_nodes += crs[crs_]
 
-    sorted_nodes += unknown + groups
-
+    sorted_nodes += unknown
+    
     return sorted_nodes
