@@ -1,5 +1,15 @@
 # Change log
 &nbsp;
+## 1.5.0
+&nbsp;
+### NEW
+- sorting and grouping now includes point clouds as geometry type
+- sorting and grouping by directory
+### FIXED
+- Qt6 compatibility (enums, events, imports, exec calls)
+- groups missing after sorting by last modified, size on disk or encoding
+- storage type functions do not break on non-vector layers
+&nbsp;
 ## 1.4.0
 &nbsp;
 ### NEW

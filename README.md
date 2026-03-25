@@ -518,7 +518,19 @@ Options (each of the options lists same CRSs in different formats):
   * descriptive name of the CRS
   * ellipsoid acronym
 
-&nbsp;  
+&nbsp;
+### DIRECTORY
+&nbsp;
+Sorts layers based on the directory their source file is located in.
+&nbsp;
+Options:
+  * A-Z
+  * Z-A
+<!-- -->
+&nbsp;
+*Memory layers don't exist as files on disk and are placed at the end, before groups.
+&nbsp;
+&nbsp;
 ## GROUPING
 &nbsp;  
 Creates groups with the layers sharing the same selected attribute(s).  
@@ -620,6 +632,11 @@ Options (each of the options lists same CRSs in different formats and creates gr
   * descriptive name of the CRS
   * ellipsoid acronym
 
+### DIRECTORY
+&nbsp;
+Groups layers whose source files are located in the same directory.
+&nbsp;
+&nbsp;
 ## SNAPSHOT  
 &nbsp;  
 Snapshot is a simple copy of the current layer tree.    
