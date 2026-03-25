@@ -305,6 +305,34 @@ def get_node_order_by_encoding(group: QgsLayerTreeGroup, encoding_order: List[st
     return sorted_nodes
 
 
+def get_node_order_by_directory(group: QgsLayerTreeGroup, reverse: bool = False) -> List[QgsLayerTreeNode]:
+    if not isinstance(group, QgsLayerTreeGroup):
+        raise ValueError(f"group: {group} not QgsLayerTreeGroup instance.")
+
+    groups = []
+    nodes = []
+    no_directory_nodes = []
+
+    for node in group.children():
+        if tools.is_node_a_group(node):
+            groups.append(node)
+            continue
+
+        directory = tools.get_node_directory(node)
+
+        if not directory:
+            no_directory_nodes.append(node)
+            continue
+
+        nodes.append(node)
+
+    sorted_nodes = sorted(nodes, key=lambda x: tools.get_node_directory(x), reverse=reverse)
+
+    sorted_nodes += no_directory_nodes + groups
+
+    return sorted_nodes
+
+
 def get_node_order_by_crs(group: QgsLayerTreeGroup, method: str, crs_order: List[str]) -> List[QgsLayerTreeNode]:
     if not isinstance(group, QgsLayerTreeGroup):
         raise ValueError(f"group: {group} not QgsLayerTreeGroup instance.")

@@ -127,6 +127,12 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
                 "Sort": lambda: self.sort_by_crs(),
                 "Refresh": lambda: self._refresh_crs(),
                 "GroupSameValues": lambda: self.group_by_crs()
+            },
+            "Directory": {
+                "Name": "Directory",
+                "Sort": lambda: self.sort_by_directory(),
+                "Refresh": None,
+                "GroupSameValues": lambda: self.group_by_directory()
             }
         }
 
@@ -422,6 +428,28 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
         for group in reversed(groups):
             tools.move_nodes_to_group(group, sorter.get_node_order_by_encoding(group, encoding_order))
 
+    def sort_by_directory(self):
+        groups = self.get_groups_to_sort()
+
+        if not groups:
+            return
+
+        reverse = self.get_directory_reverse()
+
+        for group in reversed(groups):
+            tools.move_nodes_to_group(group, sorter.get_node_order_by_directory(group, reverse))
+
+    def group_by_directory(self):
+        groups = self.get_groups_to_group_values()
+
+        if not groups:
+            return
+
+        group_singles = self.get_group_singles()
+
+        for group in reversed(groups):
+            grouper.group_same_directory(group, group_singles)
+
     def get_feature_count_most_to_less(self) -> bool:
         return self.radioButtonMostToLess.isChecked()
 
@@ -649,6 +677,9 @@ class SortAndGroupDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def get_group_name_case_sensitive(self) -> bool:
         return self.checkBoxGroupNameCaseSensitive.isChecked()
+
+    def get_directory_reverse(self) -> bool:
+        return self.radioButtonDirectoryDescending.isChecked()
 
     def get_geometries_to_group(self) -> List[int]:
         included_geometries = []

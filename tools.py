@@ -291,6 +291,11 @@ def get_node_filepath(node: QgsLayerTreeNode) -> str:
     return ""
 
 
+def get_node_directory(node: QgsLayerTreeNode) -> str:
+    filepath = get_node_filepath(node)
+    return os.path.dirname(filepath)
+
+
 def get_layer_filepath(layer: QgsLayerTreeLayer) -> str:
     filepath = ""
     try:

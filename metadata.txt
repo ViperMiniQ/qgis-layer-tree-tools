@@ -8,7 +8,7 @@ name=Layer Tree Tools
 qgisMinimumVersion=4.0
 qgisMaximumVersion=4.99
 description=Sorts and groups nodes in layer tree, takes layer tree snapshots
-version=1.4.0
+version=1.5.0
 author=Viper MiniQ
 email=viperminiq@gmail.com
 
@@ -29,7 +29,7 @@ tags=python,sort,group,snapshot
 
 homepage=https://github.com/ViperMiniQ/qgis-layer-tree-tools
 category=Plugins
-icon=sort_icon.png
+icon=icons/sort_icon.png
 # experimental flag
 experimental=False
 

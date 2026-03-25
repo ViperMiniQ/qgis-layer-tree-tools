@@ -378,6 +378,32 @@ def group_by_name_matching_regex_patter(group: QgsLayerTreeGroup, regex: str, ig
     return True
 
 
+def group_same_directory(group: QgsLayerTreeGroup, group_singles: bool = False) -> bool:
+    if not tools.is_node_a_group(group):
+        return False
+
+    same_values = {}
+
+    for node in group.children():
+        if tools.is_node_a_group(node):
+            continue
+
+        directory = tools.get_node_directory(node)
+
+        if directory not in same_values.keys():
+            same_values[directory] = [node]
+            continue
+
+        same_values[directory].append(node)
+
+    for key, nodes in same_values.items():
+        if len(nodes) <= 1 and not group_singles:
+            continue
+        tools.move_nodes_to_group(tools.create_group(group, key), nodes)
+
+    return True
+
+
 def group_same_crs(group: QgsLayerTreeGroup, method: str, group_singles: bool = False) -> bool:
     if not tools.is_node_a_group(group):
         return False
