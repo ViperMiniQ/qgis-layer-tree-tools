@@ -22,7 +22,49 @@ repository=https://github.com/ViperMiniQ/qgis-layer-tree-tools
 
 hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
-# changelog=
+changelog=
+    1.5.0
+    - NEW: sorting and grouping now includes point clouds as geometry type
+    - NEW: sorting and grouping by directory
+    - FIXED: Qt6 compatibility (enums, events, imports, exec calls)
+    - FIXED: groups missing after sorting by last modified, size on disk or encoding
+    - FIXED: storage type functions do not break on non-vector layers
+    1.4.0
+    - NEW: additional action to vacuum the database connection for layers
+    - NEW: additional action to convert Annotation layer to a regular vector layer
+    - NEW: status messages are now displayed in the status bar and log panel
+    - NEW: moving layer tree nodes up and down on Alt + arrow up/down
+    - NEW: moving layer tree nodes up and down on button press in the Layers Panel toolbar
+    - CHANGED: additional action commit changes now only works on vector layers
+    - FIXED: configuration files are automatically rebuilt if missing or corrupted
+    1.3.0
+    - NEW: sorting and grouping now possible based on CRS
+    - NEW: additional action to expand/collapse groups on double click
+    - NEW: snapshots directory can now be set (defaults to /Snapshots inside plugin directory)
+    - NEW: settings for snapshots directory and expanding groups option are saved between sessions
+    - NEW: grouping by name is now optionally case-sensitive
+    - FIXED: when copying layer files, if a file contained multiple dots in its name, the extension(s) would be doubled
+    - FIXED: snapshot loading misreporting layers failed to load when copying vector layers to memory
+    - FIXED: CRS not being applied to layers containing non EPSG authority CRS when loading snapshots
+    - FIXED: sort and group dialog won't be rebuilt every time it is opened
+    - FIXED: snapshots dialog won't be rebuilt every time it is opened
+    - FIXED: feature count not working when sorting lowest to highest due to change of GUI element name
+    - FIXED: grouping by name failing due to parsing of wrong parameters
+    1.2.1
+    - NEW: added option to sort layers by name using alphabetical or natural sorting
+    - NEW: added additional action to copy layers files to new directory
+    - NEW: additional actions menu also available from the plugin button in plugins toolbar
+    - NEW: added option to group nodes by regex pattern (node name)
+    - FIXED: using 'extract all and sort in root' would disregard the final encountered group and layers in it would be lost
+    - FIXED: background processing not working on some systems (getting garbage collected before execution)
+    - CHANGED: file size is calculated from QGIS reported sidecar files
+    1.1
+    - NEW: layer symbology is now automatically saved in snapshot file and applied on reloading
+    - NEW: added icons to layers panel (Sort and group, Snapshot, additional actions)
+    - NEW: help (README) file added to plugin dropdown menu
+    - FIXED: when using 'in selected group(s)' option, an error could arose if both a group and its sub-group were selected
+    - FIXED: snapshot creation failing on some Linux distributions due to 'finished' signal never being called to dump file to disk
+    - FIXED: replace tree with the snapshot now works
 
 # Tags are comma separated with spaces allowed
 tags=python,sort,group,snapshot
