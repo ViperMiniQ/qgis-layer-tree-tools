@@ -491,13 +491,10 @@ def get_named_style_as_qdom(layer: QgsMapLayer) -> QDomDocument:
 
 
 def stringify_qdom(document: QDomDocument) -> str:
-    text = ''
     try:
-        text = document.toString()
+        return document.toString()
     except Exception:
-        text = ''
-    finally:
-        return text
+        return ''
 
 
 def string_to_qdom(text: str):
@@ -508,13 +505,11 @@ def string_to_qdom(text: str):
 
 
 def set_layer_named_style_from_qdom(layer: QgsMapLayer, document: QDomDocument):
-    check = True
     try:
         layer.importNamedStyle(document)
-    except Exception as e:
-        check = False
-    finally:
-        return check
+        return True
+    except Exception:
+        return False
 
 
 def is_node_visible(node: QgsLayerTreeNode):
